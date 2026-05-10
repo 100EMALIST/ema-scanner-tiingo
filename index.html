@@ -79,7 +79,7 @@
   <div class="logo">200 EMA <span>DASHBOARD</span> SCANNER</div>
   <div class="topinfo">
     <span><span class="dot" id="dot"></span><span id="stat">Initialising...</span></span>
-    <span id="lupd"></span>
+    <span id="lupd"></span><span>Next: <span id="nxt" class="nxt">--</span></span>
     <span id="cnt"></span>
   </div>
 </div>
@@ -145,7 +145,8 @@ let nextAt = Date.now() + CFG.REFRESH*1000;
 setInterval(()=>{
   const s=Math.max(0,Math.round((nextAt-Date.now())/1000));
   const m=Math.floor(s/60), sc=s%60;
-  document.getElementById('nxt').textContent=`${m}:${sc<10?'0':''}${sc}`;
+  const el=document.getElementById('nxt');
+  if(el) el.textContent=`${m}:${sc<10?'0':''}${sc}`;
 },1000);
 
 // Fetch
