@@ -8,7 +8,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap');
   :root {
-    --bg:#080c14;--surface:#0d1420;--border:#1a2540;--dark:#0a0a0a;
+    --bg:#1a1a1a;--surface:#222222;--border:#333333;--dark:#111111;
     --label-bg:#1A1A2E;--trade-bg:#1a3a4a;--swing-bg:#1a1a4e;--invest-bg:#0a0830;
     --green:#00C853;--red:#CC0000;--amber:#FF9100;--gold:#FFD700;
     --white:#ffffff;--dim:rgba(255,255,255,0.35);
@@ -18,7 +18,7 @@
   body{background:var(--bg);color:var(--white);font-family:'JetBrains Mono',monospace;min-height:100vh}
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
   .logo{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--white)}
-  .topinfo{display:flex;align-items:center;gap:12px;font-size:.62rem;color:var(--dim);flex-wrap:wrap}
+  .topinfo{display:flex;align-items:center;gap:12px;font-size:.62rem;color:var(--white);flex-wrap:wrap}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--dim);display:inline-block;margin-right:4px}
   .dot.live{background:var(--green);animation:pulse 1.5s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -440,21 +440,21 @@ function buildCard(res){
   const priceColor = dailyBull ? 'var(--green)' : 'var(--red)';
 
   return `<div class="card" data-tags="${tags}">
-    <!-- Row 1: Ticker + TF labels -->
-    <div class="tick-row">
-      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')">${ticker}</div>
-      <div class="tick-gap"></div>
-      ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}">${TF_LABS[i]}</div>`).join('')}
-    </div>
-    <!-- Row 2: Price + RVOL + Section labels -->
+    <!-- Row 1: Ticker + Section labels -->
     <div style="display:flex">
-      <div style="min-width:110px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
-        ${price?.toFixed(2)||'–'} <span style="font-size:.52rem;color:var(--white)">${rvolTxt}</span>
-      </div>
+      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:110px;max-width:110px">${ticker}</div>
       <div style="width:4px;background:var(--label-bg)"></div>
       <div class="sec-label sec-trade" style="flex:3">── TRADE ──</div>
       <div class="sec-label sec-swing" style="flex:3">── SWING ──</div>
       <div class="sec-label sec-invest" style="flex:2">── INVEST ──</div>
+    </div>
+    <!-- Row 2: Price + RVOL + TF labels -->
+    <div style="display:flex">
+      <div style="min-width:110px;max-width:110px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
+        ${price?.toFixed(2)||'–'} <span style="font-size:.52rem;color:var(--white)">${rvolTxt}</span>
+      </div>
+      <div style="width:4px;background:var(--label-bg)"></div>
+      ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}">${TF_LABS[i]}</div>`).join('')}
     </div>
     ${sep()}
     ${row('200 EMA HIGH',   c200High)}
