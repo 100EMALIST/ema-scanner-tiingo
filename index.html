@@ -158,14 +158,14 @@ async function fetchT(ticker, interval, startDate){
 
 function bars(d){
   try{
-    if(!Array.isArray(d))return[];
+    if(!Array.isArray(d)||d.length===0)return[];
     return d.map(b=>({
-      h: b.high||b.adjHigh||b.close,
-      l: b.low||b.adjLow||b.close,
-      c: b.close||b.adjClose,
-      v: b.volume||0
-    })).filter(x=>x.c!=null&&x.h!=null);
-  }catch{return[]}
+      h: b.adjHigh ?? b.high ?? b.close ?? b.adjClose,
+      l: b.adjLow  ?? b.low  ?? b.close ?? b.adjClose,
+      c: b.adjClose ?? b.close,
+      v: b.adjVolume ?? b.volume ?? 0
+    })).filter(x=>x.c!=null&&x.h!=null&&x.l!=null);
+  }catch(e){console.error('bars error',e);return[]}
 }
 
 // Indicators
@@ -251,14 +251,13 @@ const SYMBOL_MAP = {
 async function scan(ticker){
   const sym = SYMBOL_MAP[ticker] || ticker;
   try{
-    const today=new Date().toISOString().split('T')[0];
     const y2=new Date(Date.now()-2*365*864e5).toISOString().split('T')[0];
     const y5=new Date(Date.now()-5*365*864e5).toISOString().split('T')[0];
-    const d30s=new Date(Date.now()-30*864e5).toISOString().split('T')[0];
-    const[d15,d30,d1h,d1d,d1w]=await Promise.all([
-      fetchT(sym,'15min',d30s),fetchT(sym,'30min',d30s),
-      fetchT(sym,'1hour',d30s),fetchT(sym,'1day',y2),fetchT(sym,'1week',y5)
+    // Use daily/weekly only — intraday needs separate Tiingo endpoint
+    const[d1d,d1w]=await Promise.all([
+      fetchT(sym,'1day',y2),fetchT(sym,'1week',y5)
     ]);
+    const d15=null,d30=null,d1h=null;
     const b1d=bars(d1d);
     if(b1d.length<60)return null;
     const price=b1d[b1d.length-1].c;
