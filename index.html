@@ -257,9 +257,8 @@ async function scan(ticker){
 
     const y2=new Date(Date.now()-2*365*864e5).toISOString().split('T')[0];
     const y5=new Date(Date.now()-5*365*864e5).toISOString().split('T')[0];
-    // Use daily/weekly only — intraday needs separate Tiingo endpoint
     const[d1d,d1w]=await Promise.all([
-      fetchT(sym,'1day',y2),fetchT(sym,'1week',y5)
+      fetchT(sym,'daily',y2),fetchT(sym,'weekly',y5)
     ]);
     const d15=null,d30=null,d1h=null;
     const b1d=bars(d1d);
