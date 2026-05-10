@@ -42,7 +42,7 @@
   /* ROWS */
   .crow{display:flex;border-top:1px solid rgba(26,37,64,.6)}
   .crow:hover .cell,.crow:hover .rlbl{filter:brightness(1.15)}
-  .rlbl{background:var(--label-bg);padding:3px 6px;font-size:.55rem;color:rgba(255,255,255,0.8);display:flex;align-items:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:110px;max-width:110px}
+  .rlbl{background:var(--label-bg);padding:3px 6px;font-size:.55rem;color:rgba(255,255,255,0.8);display:flex;align-items:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:128px;max-width:128px}
   .rgap{background:rgba(255,255,255,0.08);width:4px;min-width:4px}
   .cell{padding:3px 2px;text-align:center;font-size:.6rem;display:flex;align-items:center;justify-content:center;border-left:1px solid rgba(255,255,255,0.05);flex:1;min-width:0}
   .sep-row .rlbl,.sep-row .rgap,.sep-row .cell{height:4px;padding:0;background:rgba(255,255,255,0.12)}
@@ -51,17 +51,17 @@
 
   /* TICKER ROW */
   .tick-row{display:flex;background:var(--label-bg)}
-  .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 110px}
+  .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 128px}
   .tick-name:hover{background:#252540}.tick-name.bull{color:var(--green)}.tick-name.bear{color:var(--red)}
   .tick-gap{width:4px;background:var(--label-bg)}
-  .tick-tf{padding:3px 2px;text-align:center;font-weight:700;font-size:.58rem;letter-spacing:.05em;flex:1}
+  .tick-tf{padding:4px 2px;text-align:center;font-weight:700;font-size:.7rem;letter-spacing:.05em;flex:1;display:flex;align-items:center;justify-content:center}
   .tick-tf.trade{background:var(--trade-bg)}.tick-tf.swing{background:var(--swing-bg)}.tick-tf.invest{background:var(--invest-bg)}
-  .sec-label{padding:2px 4px;text-align:center;font-size:.5rem;font-weight:600;letter-spacing:.06em;color:rgba(255,255,255,0.6);flex:1}
+  .sec-label{padding:4px 4px;text-align:center;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,0.9);flex:1;display:flex;align-items:center;justify-content:center}
   .sec-trade{background:var(--trade-bg)}.sec-swing{background:var(--swing-bg)}.sec-invest{background:var(--invest-bg)}
 
   /* PRICE ROW */
   .price-row{display:flex;background:var(--label-bg)}
-  .price-cell{padding:3px 8px;font-size:.7rem;flex:0 0 110px;color:var(--green)}
+  .price-cell{padding:3px 8px;font-size:.7rem;flex:0 0 128px;color:var(--green)}
   .price-gap{width:4px;background:var(--label-bg)}
   .price-tf{padding:2px;text-align:center;font-size:.55rem;color:var(--dim);flex:1;background:rgba(255,255,255,0.06)}
 
@@ -71,8 +71,8 @@
 
   /* PILLS */
   .pill{display:inline-block;padding:1px 5px;border-radius:2px;font-weight:700;font-size:.58rem}
-  .p-sup{background:#006400;color:var(--green)}
-  .p-watch{background:#3d2000;color:var(--gold)}
+  .p-sup{background:#006400;color:#ffffff}
+  .p-watch{background:#3d2000;color:#ffffff}
   .p-long{background:#1a0050;color:#CC00FF}
 
   .fail-section{padding:8px 16px;font-size:.6rem;color:var(--dim)}
@@ -442,7 +442,7 @@ function buildCard(res){
   return `<div class="card" data-tags="${tags}">
     <!-- Row 1: Ticker + Section labels -->
     <div style="display:flex">
-      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:110px;max-width:110px">${ticker}</div>
+      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:128px;max-width:128px">${ticker}</div>
       <div style="width:4px;background:var(--label-bg)"></div>
       <div class="sec-label sec-trade" style="flex:3">── TRADE ──</div>
       <div class="sec-label sec-swing" style="flex:3">── SWING ──</div>
@@ -450,7 +450,7 @@ function buildCard(res){
     </div>
     <!-- Row 2: Price + RVOL + TF labels -->
     <div style="display:flex">
-      <div style="min-width:110px;max-width:110px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
+      <div style="min-width:128px;max-width:128px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
         ${price?.toFixed(2)||'–'} <span style="font-size:.52rem;color:var(--white)">${rvolTxt}</span>
       </div>
       <div style="width:4px;background:var(--label-bg)"></div>
