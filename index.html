@@ -150,14 +150,9 @@ setInterval(()=>{
 },1000);
 
 // Fetch
-const TIINGO_TOKEN = '4669bd81d63093e01dd88436069107820a0730ae';
-
 async function fetchT(ticker, interval, startDate){
   try{
-    const safeTicker = ticker.replace(/[^A-Za-z0-9.\-]/g,'').toUpperCase();
-    const url = `https://api.tiingo.com/tiingo/daily/${safeTicker}/prices?startDate=${startDate}&resampleFreq=${interval}&token=${TIINGO_TOKEN}`;
-    const r = await fetch(url, {
-      headers: { 'Content-Type': 'application/json' },
+    const r = await fetch(`/api?ticker=${encodeURIComponent(ticker)}&interval=${interval}&startDate=${startDate}`, {
       signal: AbortSignal.timeout(15000)
     });
     return r.ok ? await r.json() : null;
@@ -259,11 +254,7 @@ const SYMBOL_MAP = {
 async function scan(ticker){
   const sym = SYMBOL_MAP[ticker] || ticker;
   try{
-    // DEBUG
-    const testUrl = `/api/tiingo?ticker=${sym}&interval=1day&startDate=2023-01-01`;
-    const testR = await fetch(testUrl);
-    const testD = await testR.json();
-    console.log(`${sym} raw:`, Array.isArray(testD) ? `${testD.length} bars` : testD);
+
     const y2=new Date(Date.now()-2*365*864e5).toISOString().split('T')[0];
     const y5=new Date(Date.now()-5*365*864e5).toISOString().split('T')[0];
     // Use daily/weekly only — intraday needs separate Tiingo endpoint
