@@ -56,9 +56,9 @@
   .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 90px;white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:4px}
   .tick-name:hover{background:#252540}.tick-name.bull{color:var(--green)}.tick-name.bear{color:var(--red)}
   .tick-gap{width:4px;background:var(--label-bg)}
-  .tick-tf{padding:4px 2px;text-align:center;font-weight:700;font-size:.7rem;letter-spacing:.05em;flex:1;display:flex;align-items:center;justify-content:center}
+  .tick-tf{padding:3px 2px;text-align:center;font-weight:700;font-size:.58rem;letter-spacing:.05em;flex:1;display:flex;align-items:center;justify-content:center}
   .tick-tf.trade{background:var(--trade-bg)}.tick-tf.swing{background:var(--swing-bg)}.tick-tf.invest{background:var(--invest-bg)}
-  .sec-label{padding:4px 4px;text-align:center;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,0.9);flex:1;display:flex;align-items:center;justify-content:center}
+  .sec-label{padding:3px 4px;text-align:center;font-size:.58rem;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,0.9);flex:1;display:flex;align-items:center;justify-content:center}
   .sec-trade{background:var(--trade-bg)}.sec-swing{background:var(--swing-bg)}.sec-invest{background:var(--invest-bg)}
 
   /* PRICE ROW */
@@ -228,6 +228,9 @@ function computeTF(bs, dailyBull, price){
   const pct200l = e200l ? Math.abs(price-e200l)/e200l *100 : null;
 
   const ab5l   = e5l ? price > e5l : null;
+  const ab5h   = e5h ? price > e5h : null;
+  const inBand5 = e5h && e5l ? price <= e5h && price >= e5l : false;
+  const pct5h   = e5h ? (price - e5h) / e5h * 100 : null; // positive=above, negative=below
   const pct5l  = e5l ? Math.abs(price-e5l)/e5l*100 : null;
   const inBand100 = (e100h&&e100l) ? price<=e100h&&price>=e100l : false;
   const pct100l   = (inBand100&&e100l) ? (price-e100l)/e100l*100 : null;
@@ -257,7 +260,7 @@ function computeTF(bs, dailyBull, price){
 
   return {
     ab200, ab200h, ab200l, pct200, pct200h, pct200l,
-    ab5l, pct5l, inBand100, pct100l, pct100apr,
+    ab5l, pct5l, ab5h, pct5h, inBand5, inBand100, pct100l, pct100apr,
     rv, rsiV, vwapPct, bullCan,
     contAction, cont5, mtfLong, fire, warn
   };
@@ -410,20 +413,35 @@ function cVWAP(t){
 }
 
 
-// HTF label map — shows NEXT timeframe up
-const HTF_LABEL_MAP = {
-  '30m':'1H', '1H':'4H', '4H':'1D', '1D':'1W', '1W':'1M', '1M':'–'
-};
+const HTF_LABEL_MAP = {'30m':'1H','1H':'4H','4H':'1D','1D':'1W','1W':'1M','1M':'–'};
 
 function cHTFBand(t, tfLabel){
-  // 5m and 15m — not applicable
   if(tfLabel==='5m'||tfLabel==='15m') return nd();
-  const htfLabel = HTF_LABEL_MAP[tfLabel] || '–';
-  if(!t||t.pct5l==null) return nd();
-  // Only activate within 2%
-  if(t.pct5l > 2.0) return nd();
-  if(!t.ab5l) return `<span style="color:var(--red)">▼ ${pct(t.pct5l)}% ${htfLabel}</span>`;
-  return `<span class="go">APR ${htfLabel} ▼ ${pct(t.pct5l)}%</span>`;
+  const htf = HTF_LABEL_MAP[tfLabel] || '–';
+  if(!t||t.pct5h==null||t.pct5l==null) return nd();
+
+  const pctAboveH = t.pct5h; // positive = above high, negative = inside or below
+
+  if(!t.ab5l){
+    // Below 5 EMA Low — broken
+    const pctBelowL = Math.abs(t.pct5l);
+    return `<span style="color:var(--red)">▼ ${pct(pctBelowL)}% ${htf}</span>`;
+  }
+  if(t.ab5h){
+    // Above High
+    if(pctAboveH > 5.0) return nd(); // too far, not interested
+    return `<span class="go">APR ${htf} ▼ ${pct(pctAboveH)}%</span>`; // yellow approaching
+  }
+  // IN the band — show position (0%=at High, 100%=at Low)
+  if(t.inBand5){
+    const e5Range = t.pct5l + Math.abs(pctAboveH); // approximate band width
+    const pos = Math.abs(pctAboveH) / (e5Range || 1); // 0=top, 1=bottom
+    const bandPct = Math.round(pos * 100);
+    if(pos >= 0.6) return `<span style="color:var(--green)">IN ${htf} ${bandPct}%</span>`; // near Low = green
+    if(pos >= 0.3) return `<span style="color:var(--amber)">IN ${htf} ${bandPct}%</span>`; // mid = amber
+    return `<span class="go">IN ${htf} ${bandPct}%</span>`; // near High = yellow
+  }
+  return nd();
 }
 // ── BUILD CARD ────────────────────────────────────────────────────────────────
 function buildCard(res){
