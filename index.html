@@ -423,9 +423,8 @@ function cHTFBand(t, tfLabel){
   const pctAboveH = t.pct5h; // positive = above high, negative = inside or below
 
   if(!t.ab5l){
-    // Below 5 EMA Low — broken
-    const pctBelowL = Math.abs(t.pct5l);
-    return `<span style="color:var(--red)">▼ ${pct(pctBelowL)}% ${htf}</span>`;
+    // Below 5 EMA Low — no entry
+    return `<span style="font-size:.75rem">🚫</span>`;
   }
   if(t.ab5h){
     // Above High
