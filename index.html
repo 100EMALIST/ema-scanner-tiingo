@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EMA SCANNER</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap');
   :root {
@@ -16,7 +17,7 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--white);font-family:'JetBrains Mono',monospace;min-height:100vh}
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
-  .logo{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--green)}
+  .logo{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--white)}
   .topinfo{display:flex;align-items:center;gap:12px;font-size:.62rem;color:var(--dim);flex-wrap:wrap}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--dim);display:inline-block;margin-right:4px}
   .dot.live{background:var(--green);animation:pulse 1.5s infinite}
@@ -32,7 +33,7 @@
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(600px,1fr));gap:6px}
 
   /* CARD */
-  .card{border:1px solid rgba(255,255,255,0.12);border-radius:4px;overflow:hidden;font-size:.6rem}
+  .card{border:1px solid rgba(255,255,255,0.85);border-radius:4px;overflow:hidden;font-size:.6rem}
 
   /* SECTION HEADERS inside card */
   .sec-hdr{display:grid;gap:0}
@@ -101,7 +102,6 @@
   <button class="fbtn" onclick="setF(this,'BEAR')">🔴 BEAR</button>
   <button class="fbtn" onclick="setF(this,'SUPPORT')">SUPPORT</button>
   <button class="fbtn" onclick="setF(this,'WATCH')">WATCH</button>
-  <button class="fbtn" onclick="setF(this,'MTF')">MTF LONG</button>
   <button class="fbtn" onclick="setF(this,'HIGH_VOL')">HIGH VOL</button>
   <button class="fbtn" onclick="setF(this,'NEAR')">NEAR 200</button>
 </div>
@@ -416,8 +416,22 @@ function buildCard(res){
     return `<div class="cell${sep}">${fn(t, TF_LABS[i], ...args)}</div>`;
   }).join('');
 
-  const row = (lbl, fn, ...args) =>
-    `<div class="crow"><div class="rlbl">${lbl}</div><div class="rgap"></div>${cells(fn,...args)}</div>`;
+  const LABEL_COLORS = {
+    '200 EMA HIGH':    '#FFD700',
+    '200 EMA CLOSE':   '#FFD700',
+    '200 EMA LOW':     '#FFD700',
+    '100 EMA H/L':     '#FF6600',
+    '5 EMA LOW %':     '#00BFFF',
+    '5 EMA CONT':      '#00C853',
+    '200 EMA SUPPORT': '#00C853',
+    'VOLUME':          'rgba(255,255,255,0.7)',
+    'RSI':             'rgba(255,255,255,0.7)',
+    'VWAP':            'rgba(255,255,255,0.7)',
+  };
+  const row = (lbl, fn, ...args) => {
+    const c = LABEL_COLORS[lbl] || 'rgba(255,255,255,0.8)';
+    return `<div class="crow"><div class="rlbl" style="color:${c}">${lbl}</div><div class="rgap"></div>${cells(fn,...args)}</div>`;
+  };
 
   const sep = () =>
     `<div class="crow sep-row"><div class="rlbl"></div><div class="rgap"></div>${T.map((_,i)=>`<div class="cell${i===3?' swing-sep':i===6?' invest-sep':''}" style="height:4px"></div>`).join('')}</div>`;
@@ -441,7 +455,7 @@ function buildCard(res){
     </div>
     <!-- Price + RVOL row -->
     <div class="price-row">
-      <div class="price-cell" style="color:${priceColor}">${price?.toFixed(2)||'–'} <span style="font-size:.55rem;color:var(--dim)">${rvolTxt}</span></div>
+      <div class="price-cell" style="color:${priceColor}">${price?.toFixed(2)||'–'} <span style="font-size:.55rem;color:var(--white)">${rvolTxt}</span></div>
       <div class="price-gap"></div>
       ${T.map((_,i)=>`<div class="price-tf${i===3?' swing-sep':i===6?' invest-sep':i===7?' invest-sep':''}"></div>`).join('')}
     </div>
@@ -455,8 +469,6 @@ function buildCard(res){
     ${row('5 EMA LOW %',    c5Low)}
     ${sep()}
     ${row('VOLUME',         cVol)}
-    ${row('SIGNAL',         cSignal)}
-    ${row('MTF LONG',       cMTF)}
     ${sep()}
     ${row('200 EMA SUPPORT',cAction)}
     ${row('5 EMA CONT',     cCont5)}
