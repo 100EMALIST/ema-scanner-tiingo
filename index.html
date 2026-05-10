@@ -43,9 +43,9 @@
   .crow{display:flex;border-top:1px solid rgba(26,37,64,.6)}
   .crow:hover .cell,.crow:hover .rlbl{filter:brightness(1.15)}
   .rlbl{background:var(--label-bg);padding:3px 6px;font-size:.55rem;color:rgba(255,255,255,0.8);display:flex;align-items:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:110px;max-width:110px}
-  .rgap{background:var(--label-bg);width:4px;min-width:4px}
+  .rgap{background:rgba(255,255,255,0.08);width:4px;min-width:4px}
   .cell{padding:3px 2px;text-align:center;font-size:.6rem;display:flex;align-items:center;justify-content:center;border-left:1px solid rgba(255,255,255,0.05);flex:1;min-width:0}
-  .sep-row .rlbl,.sep-row .rgap,.sep-row .cell{height:4px;padding:0;background:rgba(255,255,255,0.04)}
+  .sep-row .rlbl,.sep-row .rgap,.sep-row .cell{height:4px;padding:0;background:rgba(255,255,255,0.12)}
   .swing-sep{border-left:2px solid rgba(255,255,255,0.15)!important}
   .invest-sep{border-left:2px solid rgba(100,80,255,0.3)!important}
 
@@ -63,7 +63,7 @@
   .price-row{display:flex;background:var(--label-bg)}
   .price-cell{padding:3px 8px;font-size:.7rem;flex:0 0 110px;color:var(--green)}
   .price-gap{width:4px;background:var(--label-bg)}
-  .price-tf{padding:2px;text-align:center;font-size:.55rem;color:var(--dim);flex:1;background:var(--dark)}
+  .price-tf{padding:2px;text-align:center;font-size:.55rem;color:var(--dim);flex:1;background:rgba(255,255,255,0.06)}
 
   /* COLOURS */
   .g{color:var(--green)}.r{color:var(--red)}.a{color:var(--amber)}.go{color:var(--gold)}.d{color:var(--dim)}.w{color:var(--white)}
@@ -86,6 +86,7 @@
 
 <div class="topbar">
   <div class="logo">EMA SCANNER</div>
+  <button onclick="document.getElementById('info-modal').style.display='flex'" style="background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:8px">ℹ</button>
   <div class="topinfo">
     <span><span class="dot" id="dot"></span><span id="stat">Initialising...</span></span>
     <span id="lupd"></span>
@@ -439,25 +440,21 @@ function buildCard(res){
   const priceColor = dailyBull ? 'var(--green)' : 'var(--red)';
 
   return `<div class="card" data-tags="${tags}">
-    <!-- Section headers -->
-    <div style="display:flex">
-      <div style="min-width:110px;background:var(--label-bg)"></div>
-      <div style="width:4px;background:var(--label-bg)"></div>
-      <div class="sec-label sec-trade" style="flex:3">── TRADE ──</div>
-      <div class="sec-label sec-swing" style="flex:3">── SWING ──</div>
-      <div class="sec-label sec-invest" style="flex:2">── INVEST ──</div>
-    </div>
-    <!-- Ticker row -->
+    <!-- Row 1: Ticker + TF labels -->
     <div class="tick-row">
       <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')">${ticker}</div>
       <div class="tick-gap"></div>
       ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}">${TF_LABS[i]}</div>`).join('')}
     </div>
-    <!-- Price + RVOL row -->
-    <div class="price-row">
-      <div class="price-cell" style="color:${priceColor}">${price?.toFixed(2)||'–'} <span style="font-size:.55rem;color:var(--white)">${rvolTxt}</span></div>
-      <div class="price-gap"></div>
-      ${T.map((_,i)=>`<div class="price-tf${i===3?' swing-sep':i===6?' invest-sep':i===7?' invest-sep':''}"></div>`).join('')}
+    <!-- Row 2: Price + RVOL + Section labels -->
+    <div style="display:flex">
+      <div style="min-width:110px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
+        ${price?.toFixed(2)||'–'} <span style="font-size:.52rem;color:var(--white)">${rvolTxt}</span>
+      </div>
+      <div style="width:4px;background:var(--label-bg)"></div>
+      <div class="sec-label sec-trade" style="flex:3">── TRADE ──</div>
+      <div class="sec-label sec-swing" style="flex:3">── SWING ──</div>
+      <div class="sec-label sec-invest" style="flex:2">── INVEST ──</div>
     </div>
     ${sep()}
     ${row('200 EMA HIGH',   c200High)}
@@ -473,8 +470,6 @@ function buildCard(res){
     ${row('200 EMA SUPPORT',cAction)}
     ${row('5 EMA CONT',     cCont5)}
     ${sep()}
-    ${row('RSI',            cRSI)}
-    ${row('VWAP',           cVWAP)}
   </div>`;
 }
 
@@ -538,5 +533,25 @@ async function runScan(){
 runScan();
 setInterval(()=>{ if(!scanning) runScan(); }, 300000);
 </script>
+
+<div id="info-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#0d1420;border:1px solid rgba(255,255,255,0.2);border-radius:6px;max-width:520px;width:100%;padding:24px;font-size:.65rem;line-height:1.8;color:rgba(255,255,255,0.85)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-family:Syne,sans-serif;font-size:1rem;font-weight:800;color:#00C853">HOW TO USE EMA SCANNER</span>
+      <button onclick="document.getElementById('info-modal').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <p style="color:#FFD700;font-weight:700;margin-bottom:8px">200 EMA SYSTEM</p>
+    <p><span style="color:#FFD700">200 EMA CLOSE</span> — Green background = price above 200 EMA (bullish). Red = below (bearish). This is your primary trend filter.</p>
+    <p style="margin-top:6px"><span style="color:#FFD700">200 EMA HIGH</span> — APR = price approaching the top of the 200 EMA band. IN = inside the band. 🫣 = fallen below close.</p>
+    <p style="margin-top:6px"><span style="color:#FFD700">200 EMA LOW</span> — Shows % above the low when between close and low. 🚫 = price has broken below the 200 EMA low — no entry.</p>
+    <p style="color:#FF6600;font-weight:700;margin:10px 0 6px">100 EMA H/L BAND</p>
+    <p>APR = approaching from above within 2%. ▲ % LOW = inside band, showing how far above the low support you are.</p>
+    <p style="color:#00BFFF;font-weight:700;margin:10px 0 6px">5 EMA LOW %</p>
+    <p>Green background = price above the 5 EMA Low — potential entry zone. 🚫 = below the 5 EMA Low — wait.</p>
+    <p style="color:#00C853;font-weight:700;margin:10px 0 6px">200 EMA SUPPORT / 5 EMA CONT</p>
+    <p><span style="color:#00C853">SUPPORT</span> = EMA holding, conditions met for entry. <span style="color:#FFD700">WATCH</span> = approaching key level, prepare.</p>
+    <p style="color:rgba(255,255,255,0.4);margin-top:14px;font-size:.58rem">Data: Tiingo · Auto-refreshes every 5 minutes · Not financial advice</p>
+  </div>
+</div>
 </body>
 </html>
