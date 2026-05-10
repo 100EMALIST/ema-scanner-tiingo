@@ -648,7 +648,7 @@ function buildCard(res){
     <div style="display:flex">
       <div style="min-width:90px;max-width:90px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px;justify-content:space-between">
         <span>${price?.toFixed(2)||'–'}</span>
-        <span id="wlb-\${ticker}" onclick="toggleWL('\${ticker}')" style="cursor:pointer;color:rgba(255,255,255,0.4);font-size:.75rem;user-select:none" title="Watchlist">☆</span>
+        <span id="wlb-${ticker}" onclick="toggleWL('${ticker}')" style="cursor:pointer;color:rgba(255,255,255,0.5);font-size:.9rem;user-select:none;line-height:1" title="Add to Watchlist">☆</span>
       </div>
       <div style="width:4px;background:var(--label-bg)"></div>
       ${TF_KEYS.map((_,i)=>`<div class="price-tf" data-tfi="${i}"></div>`).join('')}
