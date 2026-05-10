@@ -2,7 +2,7 @@ const https = require('https');
 
 const TOKEN = '4669bd81d63093e01dd88436069107820a0730ae';
 
-export default async function handler(req, res) {
+module.exports = async function(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
 
