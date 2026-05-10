@@ -1,5 +1,11 @@
 {
-  "rewrites": [
-    { "source": "/api/tiingo", "destination": "/api/tiingo" }
+  "version": 2,
+  "builds": [
+    { "src": "api/tiingo.js", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/tiingo", "dest": "/api/tiingo.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
