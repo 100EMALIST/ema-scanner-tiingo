@@ -163,6 +163,7 @@
 <footer>EMA SCANNER · Tiingo · Auto-refreshes every 5min · Click ticker → TradingView</footer>
 
 <script>
+let masterWL = new Set(JSON.parse(localStorage.getItem('masterWL')||'[]'));
 const TICKERS = [
   'RXT',
   'FLNC',
@@ -795,52 +796,11 @@ function toggleTF(btn, tf){
 }
 
 applyWL();
-}
-
-function toggleRow(btn, rowName){
-  btn.classList.toggle('active');
-  if(hiddenRows.has(rowName)) hiddenRows.delete(rowName);
-  else hiddenRows.add(rowName);
-  applyColVisibility();
-  
-let hiddenTFs = new Set();
-// TF → section mapping
-const TF_SECTION = {'5m':'trade','15m':'trade','30m':'trade','1H':'swing','4H':'swing','1D':'swing','1W':'invest','1M':'invest'};
-
-function toggleTF(btn, tf){
-  btn.classList.toggle('active');
-  if(hiddenTFs.has(tf)) hiddenTFs.delete(tf); else hiddenTFs.add(tf);
-
-  // Hide/show data cells and TF header cells
-  TF_LABS.forEach((label,i)=>{
-    document.querySelectorAll(`[data-tfi="${i}"]`).forEach(el=>{
-      el.classList.toggle('col-hidden', hiddenTFs.has(label));
-    });
-  });
-
-  // Update section headers — hide if ALL TFs in that section are hidden
-  const sections = {
-    trade: ['5m','15m','30m'],
-    swing: ['1H','4H','1D'],
-    invest: ['1W','1M']
-  };
-  document.querySelectorAll('.sec-label').forEach(el=>{
-    const sec = [...el.classList].find(c=>c.startsWith('sec-') && c!=='sec-label')?.replace('sec-','');
-    if(!sec) return;
-    const allHidden = sections[sec].every(t=>hiddenTFs.has(t));
-    el.classList.toggle('col-hidden', allHidden);
-  });
-}
-
-applyWL();
-}
 
 
 // ── MASTER WATCHLIST ─────────────────────────────────────────────────────
-let masterWL = new Set(JSON.parse(localStorage.getItem('masterWL')||'[]'));
 
 function saveWL(){ localStorage.setItem('masterWL', JSON.stringify([...masterWL])); }
-
 function toggleWL(ticker){
   const btn = document.getElementById('wlb-'+ticker);
   if(masterWL.has(ticker)){
@@ -851,8 +811,7 @@ function toggleWL(ticker){
     if(btn){ btn.textContent='★ IN WATCHLIST'; btn.classList.add('active'); }
   }
   saveWL();
-  // Update card tag
-  const card = document.querySelector(`.card[data-ticker="${ticker}"]`);
+  const card = document.querySelector('.card[data-ticker="'+ticker+'"]');
   if(card){
     let tags = card.getAttribute('data-tags');
     if(masterWL.has(ticker) && !tags.includes('WL')) tags+=',WL';
@@ -861,7 +820,6 @@ function toggleWL(ticker){
     applyFilter();
   }
 }
-
 function applyWL(){
   masterWL.forEach(ticker=>{
     const btn = document.getElementById('wlb-'+ticker);
