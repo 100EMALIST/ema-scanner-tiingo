@@ -9,7 +9,7 @@
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap');
   :root {
     --bg:#1a1a1a;--surface:#222222;--border:#333333;--dark:#111111;
-    --label-bg:#1A1A2E;--trade-bg:#1a3a4a;--swing-bg:#1a1a4e;--invest-bg:#0a0830;
+    --label-bg:#1e1e1e;--trade-bg:#252525;--swing-bg:#2a2a2a;--invest-bg:#222222;
     --green:#00C853;--red:#CC0000;--amber:#FF9100;--gold:#FFD700;
     --white:#ffffff;--dim:rgba(255,255,255,0.35);
     --near-g:#004d1a;--near-r:#5a0000;
@@ -42,16 +42,16 @@
   /* ROWS */
   .crow{display:flex;border-top:1px solid rgba(26,37,64,.6)}
   .crow:hover .cell,.crow:hover .rlbl{filter:brightness(1.15)}
-  .rlbl{background:var(--label-bg);padding:3px 6px;font-size:.55rem;color:rgba(255,255,255,0.8);display:flex;align-items:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:128px;max-width:128px}
+  .rlbl{background:var(--label-bg);padding:3px 6px;font-size:.55rem;color:rgba(255,255,255,0.8);display:flex;align-items:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:112px;max-width:112px}
   .rgap{background:rgba(255,255,255,0.08);width:4px;min-width:4px}
   .cell{padding:3px 2px;text-align:center;font-size:.6rem;display:flex;align-items:center;justify-content:center;border-left:1px solid rgba(255,255,255,0.05);flex:1;min-width:0}
   .sep-row .rlbl,.sep-row .rgap,.sep-row .cell{height:4px;padding:0;background:rgba(255,255,255,0.12)}
-  .swing-sep{border-left:2px solid rgba(255,255,255,0.15)!important}
-  .invest-sep{border-left:2px solid rgba(100,80,255,0.3)!important}
+  .swing-sep{border-left:2px solid rgba(255,255,255,0.25)!important}
+  .invest-sep{border-left:2px solid rgba(255,255,255,0.25)!important}
 
   /* TICKER ROW */
   .tick-row{display:flex;background:var(--label-bg)}
-  .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 128px}
+  .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 112px}
   .tick-name:hover{background:#252540}.tick-name.bull{color:var(--green)}.tick-name.bear{color:var(--red)}
   .tick-gap{width:4px;background:var(--label-bg)}
   .tick-tf{padding:4px 2px;text-align:center;font-weight:700;font-size:.7rem;letter-spacing:.05em;flex:1;display:flex;align-items:center;justify-content:center}
@@ -61,7 +61,7 @@
 
   /* PRICE ROW */
   .price-row{display:flex;background:var(--label-bg)}
-  .price-cell{padding:3px 8px;font-size:.7rem;flex:0 0 128px;color:var(--green)}
+  .price-cell{padding:3px 8px;font-size:.7rem;flex:0 0 112px;color:var(--green)}
   .price-gap{width:4px;background:var(--label-bg)}
   .price-tf{padding:2px;text-align:center;font-size:.55rem;color:var(--dim);flex:1;background:rgba(255,255,255,0.06)}
 
@@ -442,7 +442,7 @@ function buildCard(res){
   return `<div class="card" data-tags="${tags}">
     <!-- Row 1: Ticker + Section labels -->
     <div style="display:flex">
-      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:128px;max-width:128px">${ticker}</div>
+      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:112px;max-width:112px">${ticker}</div>
       <div style="width:4px;background:var(--label-bg)"></div>
       <div class="sec-label sec-trade" style="flex:3">── TRADE ──</div>
       <div class="sec-label sec-swing" style="flex:3">── SWING ──</div>
@@ -450,7 +450,7 @@ function buildCard(res){
     </div>
     <!-- Row 2: Price + RVOL + TF labels -->
     <div style="display:flex">
-      <div style="min-width:128px;max-width:128px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
+      <div style="min-width:112px;max-width:112px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
         ${price?.toFixed(2)||'–'} <span style="font-size:.52rem;color:var(--white)">${rvolTxt}</span>
       </div>
       <div style="width:4px;background:var(--label-bg)"></div>
