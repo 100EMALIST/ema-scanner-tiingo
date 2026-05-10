@@ -84,7 +84,7 @@
   .tbtn{padding:2px 6px;border-radius:2px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);font-family:'JetBrains Mono',monospace;font-size:.55rem;cursor:pointer;transition:all .15s}
   .tbtn.active{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.4);color:#fff}
   .tbtn:hover{border-color:rgba(255,255,255,0.35);color:rgba(255,255,255,0.7)}
-  .wl-bar{display:flex;align-items:center;padding:2px 5px;border-top:1px solid rgba(255,255,255,0.05)}
+  .wl-bar{display:none}
   .wl-btn{background:none;border:none;color:rgba(0,191,255,0.5);font-size:.7rem;cursor:pointer;padding:1px 4px;transition:all .15s;font-family:'JetBrains Mono',monospace}
   .wl-btn:hover{color:#00BFFF}
   .wl-btn.active{color:#00BFFF}
@@ -484,7 +484,7 @@ function c200Close(t){
 
 function c200High(t, tfLabel){
   if(!t)return nd();
-  if(!t.ab200) return `<span class="d" style="color:rgba(255,255,255,0.25)">🫣</span>`;
+  if(!t.ab200) return `<span style="display:block;width:100%;height:100%;background:rgba(100,0,0,0.3)"> </span>`;
   if(!t.ab200h){
     if(t.pct200h!=null && t.pct200h<=3) return `<span class="go">APR ${tfLabel} ▼ ${pct(t.pct200h)}%</span>`;
     return `<span class="g" style="font-size:.65rem">IN ${tfLabel}</span>`;
@@ -495,7 +495,7 @@ function c200High(t, tfLabel){
 
 function c200Low(t, tfLabel){
   if(!t)return nd();
-  if(!t.ab200l) return `<span style="font-size:.75rem">🚫</span>`;
+  if(!t.ab200l) return `<span style="display:block;width:100%;height:100%;background:rgba(100,0,0,0.5)"> </span>`;
   if(t.ab200) return nd(); // above close, not relevant
   if(t.pct200l!=null && t.pct200l<=3) return `<span class="g">APR ${tfLabel} ▼ ${pct(t.pct200l)}%</span>`;
   return `<span class="g">${pct(t.pct200l??0)}%</span>`;
@@ -514,7 +514,7 @@ function c5Low(t){
     const bg='var(--near-g)';
     return `<span style="background:${bg};padding:1px 4px;border-radius:2px;color:#fff">▲ ${pct(t.pct5l??0)}%</span>`;
   }
-  return `<span style="font-size:.75rem">🚫</span>`;
+  return `<span style="display:block;width:100%;height:100%;background:rgba(100,0,0,0.5)"> </span>`;
 }
 
 function cVol(t){
@@ -579,7 +579,7 @@ function cHTFBand(t, tfLabel){
 
   if(!t.ab5l){
     // Below 5 EMA Low — no entry
-    return `<span style="font-size:.75rem">🚫</span>`;
+    return `<span style="display:block;width:100%;height:100%;background:rgba(100,0,0,0.5)"> </span>`;
   }
   if(t.ab5h){
     // Above High
@@ -646,8 +646,9 @@ function buildCard(res){
     </div>
     <!-- Row 2: Price -->
     <div style="display:flex">
-      <div style="min-width:90px;max-width:90px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
-        ${price?.toFixed(2)||'–'}
+      <div style="min-width:90px;max-width:90px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px;justify-content:space-between">
+        <span>${price?.toFixed(2)||'–'}</span>
+        <span id="wlb-\${ticker}" onclick="toggleWL('\${ticker}')" style="cursor:pointer;color:rgba(255,255,255,0.4);font-size:.75rem;user-select:none" title="Watchlist">☆</span>
       </div>
       <div style="width:4px;background:var(--label-bg)"></div>
       ${TF_KEYS.map((_,i)=>`<div class="price-tf" data-tfi="${i}"></div>`).join('')}
@@ -667,9 +668,6 @@ function buildCard(res){
     ${row('200 EMA SUPPORT',cAction,true)}
     ${row('5 EMA CONTINUED',cCont5,true)}
     ${sep()}
-    <div class="wl-bar">
-      <button class="wl-btn" id="wlb-\${ticker}" onclick="toggleWL('\${ticker}')">☆ ADD TO WATCHLIST</button>
-    </div>
   </div>`;
 }
 
@@ -794,10 +792,10 @@ function toggleWL(ticker){
   const btn = document.getElementById('wlb-'+ticker);
   if(masterWL.has(ticker)){
     masterWL.delete(ticker);
-    if(btn){ btn.textContent='☆'; btn.classList.remove('active'); }
+    if(btn){ btn.textContent='☆'; btn.style.color='rgba(255,255,255,0.4)'; }
   } else {
     masterWL.add(ticker);
-    if(btn){ btn.textContent='★'; btn.classList.add('active'); }
+    if(btn){ btn.textContent='★'; btn.style.color='#ffffff'; }
   }
   saveWL();
   const card = document.querySelector('.card[data-ticker="'+ticker+'"]');
@@ -812,7 +810,7 @@ function toggleWL(ticker){
 function applyWL(){
   masterWL.forEach(ticker=>{
     const btn = document.getElementById('wlb-'+ticker);
-    if(btn){ btn.textContent='★'; btn.classList.add('active'); }
+    if(btn){ btn.textContent='★'; btn.style.color='#ffffff'; }
   });
 }
 
