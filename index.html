@@ -42,16 +42,16 @@
   /* ROWS */
   .crow{display:flex;border-top:1px solid rgba(26,37,64,.6)}
   .crow:hover .cell,.crow:hover .rlbl{filter:brightness(1.15)}
-  .rlbl{background:var(--label-bg);padding:3px 6px;font-size:.55rem;color:rgba(255,255,255,0.8);display:flex;align-items:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:112px;max-width:112px}
+  .rlbl{background:var(--label-bg);padding:3px 6px;font-size:.55rem;color:rgba(255,255,255,0.8);display:flex;align-items:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:90px;max-width:90px}
   .rgap{background:rgba(255,255,255,0.08);width:4px;min-width:4px}
   .cell{padding:3px 2px;text-align:center;font-size:.6rem;display:flex;align-items:center;justify-content:center;border-left:1px solid rgba(255,255,255,0.05);flex:1;min-width:0;background:var(--dark)}
   .sep-row .rlbl,.sep-row .rgap,.sep-row .cell{height:4px;padding:0;background:rgba(255,255,255,0.10)!important}
-  .swing-sep{border-left:2px solid rgba(255,255,255,0.25)!important}
-  .invest-sep{border-left:2px solid rgba(255,255,255,0.25)!important}
+  .swing-sep{border-left:2px solid rgba(255,255,255,0.10)!important}
+  .invest-sep{border-left:2px solid rgba(255,255,255,0.10)!important}
 
   /* TICKER ROW */
   .tick-row{display:flex;background:var(--label-bg)}
-  .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 112px}
+  .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 90px}
   .tick-name:hover{background:#252540}.tick-name.bull{color:var(--green)}.tick-name.bear{color:var(--red)}
   .tick-gap{width:4px;background:var(--label-bg)}
   .tick-tf{padding:4px 2px;text-align:center;font-weight:700;font-size:.7rem;letter-spacing:.05em;flex:1;display:flex;align-items:center;justify-content:center}
@@ -61,7 +61,7 @@
 
   /* PRICE ROW */
   .price-row{display:flex;background:var(--label-bg)}
-  .price-cell{padding:3px 8px;font-size:.7rem;flex:0 0 112px;color:var(--green)}
+  .price-cell{padding:3px 8px;font-size:.7rem;flex:0 0 90px;color:var(--green)}
   .price-gap{width:4px;background:var(--label-bg)}
   .price-tf{padding:2px;text-align:center;font-size:.55rem;color:var(--dim);flex:1;background:rgba(255,255,255,0.06)}
 
@@ -444,19 +444,19 @@ function buildCard(res){
   return `<div class="card" data-tags="${tags}">
     <!-- Row 1: Ticker + Section labels -->
     <div style="display:flex">
-      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:112px;max-width:112px">${ticker}</div>
+      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:90px;max-width:90px">${ticker}</div>
       <div style="width:4px;background:var(--label-bg)"></div>
       <div class="sec-label sec-trade" style="flex:3">── TRADE ──</div>
-      <div class="sec-label sec-swing" style="flex:3;border-left:2px solid rgba(255,255,255,0.25)">── SWING ──</div>
-      <div class="sec-label sec-invest" style="flex:2;border-left:2px solid rgba(255,255,255,0.25)">── INVEST ──</div>
+      <div class="sec-label sec-swing" style="flex:3;border-left:2px solid rgba(255,255,255,0.10)">── SWING ──</div>
+      <div class="sec-label sec-invest" style="flex:2;border-left:2px solid rgba(255,255,255,0.10)">── INVEST ──</div>
     </div>
     <!-- Row 2: Price + RVOL + TF labels -->
     <div style="display:flex">
-      <div style="min-width:112px;max-width:112px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
+      <div style="min-width:90px;max-width:90px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
         ${price?.toFixed(2)||'–'} <span style="font-size:.52rem;color:var(--white)">${rvolTxt}</span>
       </div>
       <div style="width:4px;background:var(--label-bg)"></div>
-      ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}" style="${i===3||i===6?'border-left:2px solid rgba(255,255,255,0.25)':''};">${TF_LABS[i]}</div>`).join('')}
+      ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}" style="${i===3||i===6?'border-left:2px solid rgba(255,255,255,0.10)':''};">${TF_LABS[i]}</div>`).join('')}
     </div>
     ${sep()}
     ${row('200 EMA HIGH',   c200High)}
