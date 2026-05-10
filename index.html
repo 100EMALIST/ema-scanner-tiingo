@@ -251,6 +251,11 @@ const SYMBOL_MAP = {
 async function scan(ticker){
   const sym = SYMBOL_MAP[ticker] || ticker;
   try{
+    // DEBUG
+    const testUrl = `/api/tiingo?ticker=${sym}&interval=1day&startDate=2023-01-01`;
+    const testR = await fetch(testUrl);
+    const testD = await testR.json();
+    console.log(`${sym} raw:`, Array.isArray(testD) ? `${testD.length} bars` : testD);
     const y2=new Date(Date.now()-2*365*864e5).toISOString().split('T')[0];
     const y5=new Date(Date.now()-5*365*864e5).toISOString().split('T')[0];
     // Use daily/weekly only — intraday needs separate Tiingo endpoint
