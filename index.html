@@ -45,10 +45,10 @@
   .crow{display:flex;border-top:1px solid rgba(26,37,64,.6)}
   .crow:hover .cell,.crow:hover .rlbl{filter:brightness(1.15)}
   .rlbl{background:var(--label-bg);padding:3px 6px;font-size:.55rem;color:rgba(255,255,255,0.8);display:flex;align-items:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:90px;max-width:90px}
-  .rgap{background:rgba(255,255,255,0.08);width:4px;min-width:4px}
+  .rgap{display:none}
   .cell{padding:3px 2px;text-align:center;font-size:.6rem;display:flex;align-items:center;justify-content:center;border-left:1px solid rgba(255,255,255,0.05);flex:1;min-width:0;background:var(--dark)}
   .sep-row .rlbl,.sep-row .rgap,.sep-row .cell{height:4px;padding:0;background:rgba(255,255,255,0.10)!important}
-  .swing-sep{border-left:2px solid rgba(255,255,255,0.10)!important}
+  .swing-sep{border-left:none!important}
   .invest-sep{border-left:2px solid rgba(255,255,255,0.10)!important}
 
   /* TICKER ROW */
@@ -84,6 +84,13 @@
   .tbtn{padding:2px 7px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);font-family:'JetBrains Mono',monospace;font-size:.58rem;cursor:pointer;transition:all .15s}
   .tbtn.active{background:rgba(0,200,83,0.2);border-color:var(--green);color:var(--green)}
   .tbtn:hover{border-color:rgba(255,255,255,0.4);color:rgba(255,255,255,0.8)}
+  .col-hidden{display:none!important}
+  .wl-bar{display:flex;gap:3px;padding:3px 5px;background:rgba(0,0,0,0.3);border-top:1px solid rgba(255,255,255,0.06)}
+  .wl-btn{padding:1px 6px;border-radius:2px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.4);font-family:'JetBrains Mono',monospace;font-size:.52rem;cursor:pointer;transition:all .15s}
+  .wl-btn:hover{border-color:rgba(255,255,255,0.5);color:rgba(255,255,255,0.8)}
+  .wl-btn.wl-fv{background:rgba(0,191,255,0.25);border-color:#00BFFF;color:#00BFFF}
+  .wl-btn.wl-ya{background:rgba(180,0,255,0.25);border-color:#CC00FF;color:#CC00FF}
+  .wl-btn.wl-hg{background:rgba(255,50,50,0.25);border-color:#FF3232;color:#FF3232}
   .col-hidden{display:none!important}
   .row-hidden{display:none!important}
   footer{padding:8px 16px;font-size:.55rem;color:var(--dim);border-top:1px solid var(--border);margin-top:8px}
@@ -142,6 +149,10 @@
   <button class="fbtn" onclick="setF(this,'SUPPORT')">SUPPORT</button>
   <button class="fbtn" onclick="setF(this,'WATCH')">WATCH</button>
   <button class="fbtn" onclick="setF(this,'HIGH_VOL')">HIGH VOL</button>
+  <span style="color:rgba(255,255,255,0.2);margin:0 2px">|</span>
+  <button class="fbtn" onclick="setF(this,'FV')" style="color:#00BFFF;border-color:#00BFFF">★ FV</button>
+  <button class="fbtn" onclick="setF(this,'YA')" style="color:#CC00FF;border-color:#CC00FF">★ YA</button>
+  <button class="fbtn" onclick="setF(this,'HG')" style="color:#FF3232;border-color:#FF3232">★ HG</button>
   <button class="fbtn" onclick="setF(this,'NEAR')">NEAR 200</button>
 </div>
 
@@ -451,6 +462,7 @@ async function scan(ticker){
     if(Object.values(tfs).some(t=>t?.mtfLong))tags.push('MTF');
     if(tfs.tf1d?.pct200!=null&&tfs.tf1d.pct200<=5)tags.push('NEAR');
     if(Object.values(tfs).some(t=>t?.rv!=null&&t.rv>=CFG.VOL_HIGH))tags.push('HIGH_VOL');
+    WL_NAMES.forEach(wl=>{ if(watchlists[wl].has(ticker)) tags.push(wl); });
 
     return {ticker, price, dailyBull, rvol, rvolTxt, tfs, tags:tags.join(',')};
   }catch(e){console.error(ticker,e);return null}
@@ -622,7 +634,7 @@ function buildCard(res){
 
   const priceColor = dailyBull ? 'var(--green)' : 'var(--red)';
 
-  return `<div class="card" data-tags="${tags}">
+  return `<div class="card" data-tags="${tags}" data-ticker="${ticker}">
     <!-- Row 1: Ticker + Section labels -->
     <div style="display:flex">
       <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:90px;max-width:90px">${ticker} <span style="font-size:.48rem;font-weight:400;${rvolStyle};white-space:nowrap">${rvolDisplay}</span></div>
@@ -689,6 +701,7 @@ function renderAll(){
   });
   grid.innerHTML=vals.map(buildCard).join('');
   applyColVisibility();
+  applyWLStyles();
   applyFilter();
   const bull=vals.filter(r=>r.dailyBull).length;
   document.getElementById('cnt').textContent=`${vals.length} stocks | 🟢 ${bull} | 🔴 ${vals.length-bull}`;
@@ -721,6 +734,58 @@ async function runScan(){
   document.getElementById('prog').textContent='';
 }
 
+
+
+// ── WATCHLISTS (persisted in localStorage) ───────────────────────────────
+const WL_NAMES = ['FV','YA','HG'];
+let watchlists = {FV:new Set(), YA:new Set(), HG:new Set()};
+
+function loadWL(){
+  WL_NAMES.forEach(wl=>{
+    const saved = localStorage.getItem('wl_'+wl);
+    if(saved) watchlists[wl] = new Set(JSON.parse(saved));
+  });
+}
+function saveWL(wl){
+  localStorage.setItem('wl_'+wl, JSON.stringify([...watchlists[wl]]));
+}
+function toggleWL(ticker, wl){
+  if(watchlists[wl].has(ticker)){
+    watchlists[wl].delete(ticker);
+  } else {
+    watchlists[wl].add(ticker);
+  }
+  saveWL(wl);
+  applyWLStyles();
+  // Update card tags for filtering
+  const card = document.querySelector(`.card[data-ticker="${ticker}"]`);
+  if(card){
+    const tags = card.getAttribute('data-tags');
+    const newTags = WL_NAMES.reduce((acc,w)=>{
+      const has = watchlists[w].has(ticker);
+      const cur = acc.includes(w);
+      if(has && !cur) return acc+','+w;
+      if(!has && cur) return acc.split(',').filter(t=>t!==w).join(',');
+      return acc;
+    }, tags);
+    card.setAttribute('data-tags', newTags);
+    applyFilter();
+  }
+}
+function applyWLStyles(){
+  WL_NAMES.forEach(wl=>{
+    watchlists[wl].forEach(ticker=>{
+      const btn = document.getElementById('wl-'+wl.toLowerCase()+'-'+ticker);
+      if(btn) btn.classList.add('wl-'+wl.toLowerCase());
+    });
+    // Remove style from unselected
+    document.querySelectorAll(`.wl-btn[id^="wl-${wl.toLowerCase()}-"]`).forEach(btn=>{
+      const t = btn.id.replace('wl-'+wl.toLowerCase()+'-','');
+      if(!watchlists[wl].has(t)) btn.classList.remove('wl-'+wl.toLowerCase());
+    });
+  });
+}
+loadWL();
 
 // Column index map for TF toggling
 const TF_COL_INDEX = {'5m':0,'15m':1,'30m':2,'1H':3,'4H':4,'1D':5,'1W':6,'1M':7};
@@ -756,6 +821,7 @@ function toggleTF(btn, tf){
   if(hiddenTFs.has(tf)) hiddenTFs.delete(tf);
   else hiddenTFs.add(tf);
   applyColVisibility();
+  applyWLStyles();
 }
 
 function toggleRow(btn, rowName){
@@ -763,6 +829,7 @@ function toggleRow(btn, rowName){
   if(hiddenRows.has(rowName)) hiddenRows.delete(rowName);
   else hiddenRows.add(rowName);
   applyColVisibility();
+  applyWLStyles();
 }
 
 // Auto-scan on load, refresh every 5 min
