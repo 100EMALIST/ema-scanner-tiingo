@@ -1,34 +1,689 @@
-const https = require('https');
-const TOKEN = '4669bd81d63093e01dd88436069107820a0730ae';
-
-module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Content-Type', 'application/json');
-
-  const { ticker, interval, startDate } = req.query;
-  if (!ticker) return res.status(400).json({ error: 'Missing ticker' });
-
-  const t = ticker.replace(/[^A-Za-z0-9.\-]/g, '').toUpperCase();
-  const s = (startDate || '2023-01-01').replace(/[^0-9\-]/g, '');
-  const f = (interval || '1day').replace(/[^a-z0-9]/g, '');
-  const url = `https://api.tiingo.com/tiingo/daily/${t}/prices?startDate=${s}&resampleFreq=${f}&token=${TOKEN}`;
-
-  try {
-    const data = await new Promise((resolve, reject) => {
-      const r = https.get(url, {
-        headers: { 'Authorization': `Token ${TOKEN}` },
-        timeout: 12000
-      }, (res) => {
-        let body = '';
-        res.on('data', c => body += c);
-        res.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { reject(e); } });
-      });
-      r.on('error', reject);
-      r.on('timeout', () => { r.destroy(); reject(new Error('Timeout')); });
-    });
-    res.setHeader('Cache-Control', 'public, max-age=60');
-    return res.status(200).json(data);
-  } catch(e) {
-    return res.status(502).json({ error: e.message });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMA SCANNER</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap');
+  :root {
+    --bg:#1a1a1a;--surface:#222222;--border:#333333;--dark:#111111;
+    --label-bg:#1A1A2E;--trade-bg:#1a3a4a;--swing-bg:#1a1a4e;--invest-bg:#0a0830;
+    --green:#00C853;--red:#CC0000;--amber:#FF9100;--gold:#FFD700;
+    --white:#ffffff;--dim:rgba(255,255,255,0.35);
+    --near-g:#004d1a;--near-r:#5a0000;
   }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--white);font-family:'JetBrains Mono',monospace;min-height:100vh}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
+  .logo{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--white)}
+  .topinfo{display:flex;align-items:center;gap:12px;font-size:.62rem;color:var(--white);flex-wrap:wrap}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--dim);display:inline-block;margin-right:4px}
+  .dot.live{background:var(--green);animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .loading-bar{height:2px;background:linear-gradient(90deg,var(--green),var(--amber));animation:scan 1.5s linear infinite;display:none}
+  .loading-bar.active{display:block}
+  @keyframes scan{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
+  .prog{font-size:.6rem;color:var(--dim);padding:3px 16px;min-height:16px}
+  .filters{display:flex;gap:5px;padding:6px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+  .fbtn{padding:3px 9px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);font-family:'JetBrains Mono',monospace;font-size:.6rem;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.05em}
+  .fbtn:hover{border-color:var(--green);color:var(--green)}
+  .fbtn.active{background:var(--green);border-color:var(--green);color:#000;font-weight:700}
+  .fbtn.inactive{opacity:0.35}
+  .wrap{padding:10px 14px;overflow-x:auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(600px,1fr));gap:6px}
+
+  /* CARD */
+  .card{border:1px solid rgba(255,255,255,0.85);border-radius:4px;overflow:hidden;font-size:.6rem}
+
+  /* SECTION HEADERS inside card */
+  .sec-hdr{display:grid;gap:0}
+  .sec-hdr-row{display:flex}
+
+  /* ROWS */
+  .crow{display:flex;border-top:1px solid rgba(26,37,64,.6)}
+  .crow:hover .cell,.crow:hover .rlbl{filter:brightness(1.15)}
+  .rlbl{background:var(--label-bg);padding:3px 6px;font-size:.55rem;color:rgba(255,255,255,0.8);display:flex;align-items:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:90px;max-width:90px}
+  .rgap{background:rgba(255,255,255,0.08);width:4px;min-width:4px}
+  .cell{padding:3px 2px;text-align:center;font-size:.6rem;display:flex;align-items:center;justify-content:center;border-left:1px solid rgba(255,255,255,0.05);flex:1;min-width:0;background:var(--dark)}
+  .sep-row .rlbl,.sep-row .rgap,.sep-row .cell{height:4px;padding:0;background:rgba(255,255,255,0.10)!important}
+  .swing-sep{border-left:2px solid rgba(255,255,255,0.10)!important}
+  .invest-sep{border-left:2px solid rgba(255,255,255,0.10)!important}
+
+  /* TICKER ROW */
+  .tick-row{display:flex;background:var(--label-bg)}
+  .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 90px;white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:4px}
+  .tick-name:hover{background:#252540}.tick-name.bull{color:var(--green)}.tick-name.bear{color:var(--red)}
+  .tick-gap{width:4px;background:var(--label-bg)}
+  .tick-tf{padding:3px 2px;text-align:center;font-weight:700;font-size:.58rem;letter-spacing:.05em;flex:1;display:flex;align-items:center;justify-content:center}
+  .tick-tf.trade{background:var(--trade-bg)}.tick-tf.swing{background:var(--swing-bg)}.tick-tf.invest{background:var(--invest-bg)}
+  .sec-label{padding:3px 4px;text-align:center;font-size:.58rem;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,0.9);flex:1;display:flex;align-items:center;justify-content:center}
+  .sec-trade{background:var(--trade-bg)}.sec-swing{background:var(--swing-bg)}.sec-invest{background:var(--invest-bg)}
+
+  /* PRICE ROW */
+  .price-row{display:flex;background:var(--label-bg)}
+  .price-cell{padding:3px 8px;font-size:.7rem;flex:0 0 90px;color:var(--green)}
+  .price-gap{width:4px;background:var(--label-bg)}
+  .price-tf{padding:2px;text-align:center;font-size:.55rem;color:var(--dim);flex:1;background:rgba(255,255,255,0.06)}
+
+  /* COLOURS */
+  .g{color:var(--green)}.r{color:var(--red)}.a{color:var(--amber)}.go{color:var(--gold)}.d{color:var(--dim)}.w{color:var(--white)}
+  .bg-ng{background:var(--near-g)}.bg-nr{background:var(--near-r)}.bg-dk{background:var(--dark)}
+
+  /* PILLS */
+  .pill{display:inline-block;padding:1px 5px;border-radius:2px;font-weight:700;font-size:.58rem}
+  .p-sup{background:#006400;color:#ffffff}
+  .p-watch{background:rgba(255,165,0,0.15);color:#ffffff}
+  .p-long{background:#1a0050;color:#CC00FF}
+
+  .fail-section{padding:8px 16px;font-size:.6rem;color:var(--dim)}
+  .fail-section h3{color:#ff4444;margin-bottom:4px}
+  .fail-list{display:flex;flex-wrap:wrap;gap:4px}
+  .fail-tag{background:#1a0000;border:1px solid #660000;color:#ff6666;padding:1px 6px;border-radius:2px;font-size:.58rem}
+  .tbtn{padding:2px 7px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);font-family:'JetBrains Mono',monospace;font-size:.58rem;cursor:pointer;transition:all .15s}
+  .tbtn.active{background:rgba(0,200,83,0.2);border-color:var(--green);color:var(--green)}
+  .tbtn:hover{border-color:rgba(255,255,255,0.4);color:rgba(255,255,255,0.8)}
+  .col-hidden{display:none!important}
+  .row-hidden{display:none!important}
+  footer{padding:8px 16px;font-size:.55rem;color:var(--dim);border-top:1px solid var(--border);margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">EMA SCANNER</div>
+  <button onclick="document.getElementById('info-modal').style.display='flex'" style="background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:8px">ℹ</button>
+  <div class="topinfo">
+    <span><span class="dot" id="dot"></span><span id="stat">Initialising...</span></span>
+    <span id="lupd"></span>
+    <span>Next: <span id="nxt" style="color:#00BFFF;font-weight:700">--</span></span>
+    <span id="cnt"></span>
+  </div>
+</div>
+<div class="loading-bar" id="lb"></div>
+<div class="prog" id="prog"></div>
+
+
+<div id="toggle-panel" style="display:none;padding:8px 14px;background:#111;border-bottom:1px solid #333;flex-wrap:wrap;gap:12px">
+  <div>
+    <div style="font-size:.55rem;color:rgba(255,255,255,0.4);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Timeframes</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap" id="tf-toggles">
+      <button class="tbtn active" data-tf="5m" onclick="toggleTF(this,'5m')">5m</button>
+      <button class="tbtn active" data-tf="15m" onclick="toggleTF(this,'15m')">15m</button>
+      <button class="tbtn active" data-tf="30m" onclick="toggleTF(this,'30m')">30m</button>
+      <button class="tbtn active" data-tf="1H" onclick="toggleTF(this,'1H')">1H</button>
+      <button class="tbtn active" data-tf="4H" onclick="toggleTF(this,'4H')">4H</button>
+      <button class="tbtn active" data-tf="1D" onclick="toggleTF(this,'1D')">1D</button>
+      <button class="tbtn active" data-tf="1W" onclick="toggleTF(this,'1W')">1W</button>
+      <button class="tbtn active" data-tf="1M" onclick="toggleTF(this,'1M')">1M</button>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:.55rem;color:rgba(255,255,255,0.4);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Rows</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap" id="row-toggles">
+      <button class="tbtn active" data-row="200 EMA HIGH" onclick="toggleRow(this,'200 EMA HIGH')">200 HIGH</button>
+      <button class="tbtn active" data-row="200 EMA CLOSE" onclick="toggleRow(this,'200 EMA CLOSE')">200 CLOSE</button>
+      <button class="tbtn active" data-row="200 EMA LOW" onclick="toggleRow(this,'200 EMA LOW')">200 LOW</button>
+      <button class="tbtn active" data-row="100 EMA H/L" onclick="toggleRow(this,'100 EMA H/L')">100 BAND</button>
+      <button class="tbtn active" data-row="5 EMA LOW %" onclick="toggleRow(this,'5 EMA LOW %')">5 LOW%</button>
+      <button class="tbtn active" data-row="5 EMA HTF BAND" onclick="toggleRow(this,'5 EMA HTF BAND')">5 HTF</button>
+      <button class="tbtn active" data-row="VOLUME" onclick="toggleRow(this,'VOLUME')">VOLUME</button>
+      <button class="tbtn active" data-row="200 EMA SUPPORT" onclick="toggleRow(this,'200 EMA SUPPORT')">SUPPORT</button>
+      <button class="tbtn active" data-row="5 EMA CONTINUED" onclick="toggleRow(this,'5 EMA CONTINUED')">5 CONT</button>
+    </div>
+  </div>
+</div>
+<div class="filters">
+  <button class="fbtn active" onclick="setF(this,'ALL')">ALL</button>
+  <button class="fbtn" onclick="document.getElementById('toggle-panel').style.display=document.getElementById('toggle-panel').style.display==='none'?'flex':'none'" style="margin-left:auto">⚙ COLUMNS</button>
+  <button class="fbtn" onclick="setF(this,'BULL')">🟢 BULL</button>
+  <button class="fbtn" onclick="setF(this,'BEAR')">🔴 BEAR</button>
+  <button class="fbtn" onclick="setF(this,'SUPPORT')">SUPPORT</button>
+  <button class="fbtn" onclick="setF(this,'WATCH')">WATCH</button>
+  <button class="fbtn" onclick="setF(this,'HIGH_VOL')">HIGH VOL</button>
+  <button class="fbtn" onclick="setF(this,'NEAR')">NEAR 200</button>
+</div>
+
+<div class="wrap">
+  <div class="grid" id="grid">
+    <div style="padding:40px;text-align:center;color:var(--dim)">Scanning...</div>
+  </div>
+</div>
+
+<div class="fail-section" id="fs" style="display:none">
+  <h3>⚠️ Failed:</h3>
+  <div class="fail-list" id="fl"></div>
+</div>
+
+<footer>EMA SCANNER · Tiingo · Auto-refreshes every 5min · Click ticker → TradingView</footer>
+
+<script>
+const TICKERS = [
+  'RXT','FLNC','FTNT','FIG','APP','SGML','UUUU','PATH','TOST','ADSK',
+  'RBLX','SHOP','POET','OSCR','TSLA','ADBE','AXTI','GRAB','NVDA',
+  'FCX','ZETA','ORCL','SNAP','SOUN','SMCI','PYPL','NKE','NIO','NFLX',
+  'CSCO','BABA','PACS','IREN','OPEN','NUVB','GOOG','MU','INTC',
+  'ASML','HPQ','ENPH','AVGO','RIVN','ONON','DELL','MP','AMD',
+  'SPHR','QBTS','BBAI','SERV','BE','EOSE','RKLB','ASTS','UBER','MSTR',
+  'ONDS','FLY','CART','RGTI','CVE','WULF','IONQ','LBRT',
+  'TEM','LUNR','COHR','CRCL','PL','OUST','HUT','LUMN','CORZ',
+  'KULR','BYND','NTLA','XAGUSD=X'
+];
+
+const CFG = {
+  VOL_HIGH:1.5, VOL_LOW:0.8,
+  RSI_OS:30, RSI_OB:70,
+  REFRESH:300,
+  CONT_BUY:5, CONT_WATCH:10, REV_WATCH:15,
+  WARN_PCT:3.0, FIRE_PCT:1.0,
 };
+
+// TF columns: 5m, 15m, 30m = TRADE | 1H, 4H, 1D = SWING | 1W = INVEST
+const TF_KEYS  = ['tf5m','tf15m','tf30m','tf1h','tf4h','tf1d','tf1w','tf1M'];
+const TF_LABS  = ['5m','15m','30m','1H','4H','1D','1W','1M'];
+const TF_CLASS = ['trade','trade','trade','swing','swing','swing','invest','invest'];
+
+let results={}, failed=[], curFilter='ALL', scanning=false;
+let nextAt = Date.now() + CFG.REFRESH*1000;
+
+setInterval(()=>{
+  const s=Math.max(0,Math.round((nextAt-Date.now())/1000));
+  const m=Math.floor(s/60),sc=s%60;
+  const el=document.getElementById('nxt');
+  if(el) el.textContent=`${m}:${sc<10?'0':''}${sc}`;
+},1000);
+
+// ── API FETCHERS ─────────────────────────────────────────────────────────────
+async function fetchT(ticker, interval, startDate){
+  try{
+    const r=await fetch(`/api?ticker=${encodeURIComponent(ticker)}&interval=${interval}&startDate=${startDate}`,{signal:AbortSignal.timeout(15000)});
+    return r.ok?await r.json():null;
+  }catch{return null}
+}
+async function fetchIEX(ticker, resampleFreq, startDate){
+  try{
+    const r=await fetch(`/api?ticker=${encodeURIComponent(ticker)}&interval=${resampleFreq}&startDate=${startDate}&endpoint=iex`,{signal:AbortSignal.timeout(15000)});
+    return r.ok?await r.json():null;
+  }catch{return null}
+}
+
+// ── BAR PARSER ───────────────────────────────────────────────────────────────
+function bars(d){
+  try{
+    if(!Array.isArray(d)||d.length===0)return[];
+    return d.map(b=>({h:b.high,l:b.low,c:b.close,v:b.volume??0})).filter(x=>x.c!=null&&x.h!=null&&x.l!=null);
+  }catch{return[]}
+}
+
+// ── INDICATORS ───────────────────────────────────────────────────────────────
+function EMA(bs,p,s='c'){
+  if(!bs||bs.length<p)return null;
+  const k=2/(p+1);let e=bs.slice(0,p).reduce((a,b)=>a+b[s],0)/p;
+  for(let i=p;i<bs.length;i++)e=bs[i][s]*k+e*(1-k);return e;
+}
+function RSI(bs,p=14){
+  if(!bs||bs.length<p+1)return null;
+  let g=0,l=0;
+  for(let i=1;i<=p;i++){const d=bs[i].c-bs[i-1].c;d>0?g+=d:l-=d}
+  let ag=g/p,al=l/p;
+  for(let i=p+1;i<bs.length;i++){const d=bs[i].c-bs[i-1].c;ag=(ag*(p-1)+Math.max(d,0))/p;al=(al*(p-1)+Math.max(-d,0))/p}
+  return al===0?100:100-(100/(1+ag/al));
+}
+function RVOL(bs,p=20){
+  if(!bs||bs.length<p+1)return null;
+  const avg=bs.slice(-p-1,-1).reduce((a,b)=>a+(b.v||0),0)/p;
+  return avg>0?(bs[bs.length-1].v||0)/avg:null;
+}
+function VWAP(bs){
+  if(!bs||bs.length<5)return null;
+  const sl=bs.slice(-20);
+  const sp=sl.reduce((a,b)=>a+((b.h+b.l+b.c)/3)*(b.v||0),0);
+  const sv=sl.reduce((a,b)=>a+(b.v||0),0);
+  return sv>0?sp/sv:null;
+}
+
+// ── COMPUTE PER TF ───────────────────────────────────────────────────────────
+function computeTF(bs, dailyBull, price){
+  if(!bs||bs.length<30)return null;
+  const len=bs.length;
+  const e200  = EMA(bs, Math.min(200,len-1));
+  const e200h = EMA(bs, Math.min(200,len-1), 'h');
+  const e200l = EMA(bs, Math.min(200,len-1), 'l');
+  const e100h = EMA(bs, Math.min(100,len-1), 'h');
+  const e100l = EMA(bs, Math.min(100,len-1), 'l');
+  const e5l   = EMA(bs, 5, 'l');
+  const e5h   = EMA(bs, 5, 'h');
+
+  const ab200  = e200  ? price > e200  : null;
+  const ab200h = e200h ? price > e200h : null;
+  const ab200l = e200l ? price > e200l : null;
+
+  const pct200  = e200  ? Math.abs(price-e200) /e200  *100 : null;
+  const pct200h = e200h ? Math.abs(price-e200h)/e200h *100 : null;
+  const pct200l = e200l ? Math.abs(price-e200l)/e200l *100 : null;
+
+  const ab5l   = e5l ? price > e5l : null;
+  const ab5h   = e5h ? price > e5h : null;
+  const inBand5 = e5h && e5l ? price <= e5h && price >= e5l : false;
+  const pct5h   = e5h ? (price - e5h) / e5h * 100 : null; // positive=above, negative=below
+  const pct5l  = e5l ? Math.abs(price-e5l)/e5l*100 : null;
+  const inBand100 = (e100h&&e100l) ? price<=e100h&&price>=e100l : false;
+  const pct100l   = (inBand100&&e100l) ? (price-e100l)/e100l*100 : null;
+  const pct100apr = (!inBand100&&e100h&&price>e100h) ? (price-e100h)/e100h*100 : null;
+
+  const rv       = RVOL(bs);
+  const rsiV     = RSI(bs);
+  const vwapV    = VWAP(bs);
+  const vwapPct  = vwapV ? (price-vwapV)/vwapV*100 : null;
+  const bullCan  = bs[bs.length-1].c >= bs[bs.length-1].h*0.5; // approx
+
+  // Action
+  let contAction='–', cont5='–';
+  if(dailyBull && ab200){
+    if(pct200<=CFG.CONT_BUY) contAction='SUPPORT';
+    else if(pct200<=CFG.CONT_WATCH) contAction='WATCH';
+  }
+  if(ab5l && pct5l!=null && pct5l<=CFG.FIRE_PCT) cont5='SUPPORT';
+  else if(ab5l && pct5l!=null && pct5l<=CFG.CONT_WATCH) cont5='WATCH';
+
+  // MTF Long — price below 200 EMA on this TF but daily is bull
+  const mtfLong = dailyBull && ab200===false;
+
+  // Signal
+  const fire = (ab200 && pct200!=null && pct200<=CFG.FIRE_PCT) || (ab5l && pct5l!=null && pct5l<=CFG.FIRE_PCT);
+  const warn = ab200===false && pct200!=null && pct200<=CFG.WARN_PCT;
+
+  return {
+    ab200, ab200h, ab200l, pct200, pct200h, pct200l,
+    ab5l, pct5l, ab5h, pct5h, inBand5, inBand100, pct100l, pct100apr,
+    rv, rsiV, vwapPct, bullCan,
+    contAction, cont5, mtfLong, fire, warn
+  };
+}
+
+// ── SCAN ─────────────────────────────────────────────────────────────────────
+async function scan(ticker){
+  try{
+    const y1  = new Date(Date.now()-400*864e5).toISOString().split('T')[0];
+    const y4  = new Date(Date.now()-4*365*864e5).toISOString().split('T')[0];
+    const d30 = new Date(Date.now()-30*864e5).toISOString().split('T')[0];
+
+    const y10 = new Date(Date.now()-10*365*864e5).toISOString().split('T')[0];
+    const [d1d, d1w, d5m, d1M] = await Promise.all([
+      fetchT(ticker,'daily',y1),
+      fetchT(ticker,'weekly',y4),
+      fetchIEX(ticker,'5min',d30),
+      fetchT(ticker,'monthly',y10)
+    ]);
+
+    const b1d=bars(d1d), b1w=bars(d1w), b5m=bars(d5m), b1M=bars(d1M);
+    if(b1d.length<60)return null;
+
+    const price    = b1d[b1d.length-1].c;
+    const e200_1d  = EMA(b1d, 200);
+    const dailyBull= e200_1d ? price > e200_1d : false;
+    const rvol     = RVOL(b1d);
+    const rvolTxt  = rvol!=null ? (rvol>=CFG.VOL_HIGH?'🔥 ':rvol<=CFG.VOL_LOW?'💤 ':'')+Math.round(rvol*100)/100+'x' : '–';
+
+    // Build TF data — use 1D bars for 5m/15m/30m/1H/4H approximation when no intraday
+    // Real 5m data from IEX, others use 1D slices as proxy
+    const tfs = {
+      tf5m:  computeTF(b5m.length>30?b5m:b1d.slice(-60),  dailyBull, price),
+      tf15m: computeTF(b1d.slice(-80),  dailyBull, price),
+      tf30m: computeTF(b1d.slice(-100), dailyBull, price),
+      tf1h:  computeTF(b1d.slice(-120), dailyBull, price),
+      tf4h:  computeTF(b1d.slice(-150), dailyBull, price),
+      tf1d:  computeTF(b1d,             dailyBull, price),
+      tf1w:  computeTF(b1w.length>30?b1w:b1d, dailyBull, price),
+      tf1M:  computeTF(b1M.length>20?b1M:b1d.slice(-60), dailyBull, price),
+    };
+
+    // Tags
+    const tags=['ALL'];
+    if(dailyBull)tags.push('BULL');else tags.push('BEAR');
+    if(Object.values(tfs).some(t=>t?.contAction==='SUPPORT'))tags.push('SUPPORT');
+    if(Object.values(tfs).some(t=>t?.contAction==='WATCH'))tags.push('WATCH');
+    if(Object.values(tfs).some(t=>t?.mtfLong))tags.push('MTF');
+    if(tfs.tf1d?.pct200!=null&&tfs.tf1d.pct200<=5)tags.push('NEAR');
+    if(Object.values(tfs).some(t=>t?.rv!=null&&t.rv>=CFG.VOL_HIGH))tags.push('HIGH_VOL');
+
+    return {ticker, price, dailyBull, rvol, rvolTxt, tfs, tags:tags.join(',')};
+  }catch(e){console.error(ticker,e);return null}
+}
+
+// ── CELL RENDERERS ────────────────────────────────────────────────────────────
+const nd = () => `<span class="d">–</span>`;
+const pct = v => Math.round(v*100)/100;
+
+function c200Close(t){
+  if(!t||t.ab200==null)return nd();
+  const bg = t.ab200 ? 'var(--near-g)' : 'var(--near-r)';
+  const dir = t.ab200 ? '▲' : '▼';
+  return `<span style="background:${bg};padding:1px 4px;border-radius:2px;color:#fff">${dir} ${pct(t.pct200??0)}%</span>`;
+}
+
+function c200High(t, tfLabel){
+  if(!t)return nd();
+  if(!t.ab200) return `<span class="d" style="color:rgba(255,255,255,0.25)">🫣</span>`;
+  if(!t.ab200h){
+    if(t.pct200h!=null && t.pct200h<=3) return `<span class="go">APR ${tfLabel} ▼ ${pct(t.pct200h)}%</span>`;
+    return `<span class="g" style="font-size:.65rem">IN ${tfLabel}</span>`;
+  }
+  if(t.pct200h!=null && t.pct200h<=3) return `<span class="go">APR ${tfLabel} ▼ ${pct(t.pct200h)}%</span>`;
+  return nd();
+}
+
+function c200Low(t, tfLabel){
+  if(!t)return nd();
+  if(!t.ab200l) return `<span style="font-size:.75rem">🚫</span>`;
+  if(t.ab200) return nd(); // above close, not relevant
+  if(t.pct200l!=null && t.pct200l<=3) return `<span class="g">APR ${tfLabel} ▼ ${pct(t.pct200l)}%</span>`;
+  return `<span class="g">${pct(t.pct200l??0)}%</span>`;
+}
+
+function c100Band(t){
+  if(!t)return nd();
+  if(t.inBand100 && t.pct100l!=null) return `<span class="g">▲ ${pct(t.pct100l)}% LOW</span>`;
+  if(!t.inBand100 && t.pct100apr!=null && t.pct100apr<=2) return `<span class="go">APR ▼ ${pct(t.pct100apr)}%</span>`;
+  return nd();
+}
+
+function c5Low(t){
+  if(!t||t.ab5l==null)return nd();
+  if(t.ab5l){
+    const bg='var(--near-g)';
+    return `<span style="background:${bg};padding:1px 4px;border-radius:2px;color:#fff">▲ ${pct(t.pct5l??0)}%</span>`;
+  }
+  return `<span style="font-size:.75rem">🚫</span>`;
+}
+
+function cVol(t){
+  if(!t||t.rv==null)return nd();
+  const last = t.bullCan;
+  if(t.rv>=CFG.VOL_HIGH) return `<span style="color:${last?'var(--green)':'var(--red)'};font-weight:700">HIGH</span>`;
+  if(t.rv<=CFG.VOL_LOW)  return `<span class="d">LOW</span>`;
+  return `<span style="color:rgba(255,255,255,0.45)">AVG</span>`;
+}
+
+function cSignal(t){
+  if(!t)return nd();
+  if(t.fire) return `<span style="font-size:.8rem">🔥</span>`;
+  if(t.warn) return `<span style="color:var(--red);font-weight:700">❗</span>`;
+  return `<span style="font-size:.7rem;color:rgba(255,255,255,0.2)">·</span>`;
+}
+
+function cMTF(t){
+  if(!t||!t.mtfLong)return nd();
+  return `<span style="font-size:.8rem">🔥</span>`;
+}
+
+function cAction(t){
+  if(!t||t.contAction==='–')return nd();
+  if(t.contAction==='SUPPORT') return `<span class="pill p-sup">SUPPORT</span>`;
+  if(t.contAction==='WATCH')   return `<span class="pill p-watch">WATCH</span>`;
+  return nd();
+}
+
+function cCont5(t){
+  if(!t||t.cont5==='–')return nd();
+  if(t.cont5==='SUPPORT') return `<span class="pill p-sup" style="background:var(--near-g)">SUPPORT</span>`;
+  if(t.cont5==='WATCH')   return `<span class="pill p-watch">WATCH</span>`;
+  return nd();
+}
+
+function cRSI(t){
+  if(!t||t.rsiV==null)return nd();
+  const v=t.rsiV;
+  const r=Math.round(v*10)/10;
+  if(v>=CFG.RSI_OB) return `<span style="color:var(--red)">${r}</span>`;
+  if(v<=CFG.RSI_OS) return `<span style="color:var(--green)">${r}</span>`;
+  return `<span class="d">${r}</span>`;
+}
+
+function cVWAP(t){
+  if(!t||t.vwapPct==null)return nd();
+  const v=t.vwapPct, a=Math.abs(v).toFixed(2);
+  if(Math.abs(v)<=1) return `<span class="d">${v>=0?'▲':'▼'} ${a}%</span>`;
+  return `<span style="color:${v>0?'var(--green)':'var(--red)'}">${v>0?'▲':'▼'} ${a}%</span>`;
+}
+
+
+const HTF_LABEL_MAP = {'30m':'1H','1H':'4H','4H':'1D','1D':'1W','1W':'1M','1M':'–'};
+
+function cHTFBand(t, tfLabel){
+  if(tfLabel==='5m'||tfLabel==='15m') return nd();
+  const htf = HTF_LABEL_MAP[tfLabel] || '–';
+  if(!t||t.pct5h==null||t.pct5l==null) return nd();
+
+  const pctAboveH = t.pct5h; // positive = above high, negative = inside or below
+
+  if(!t.ab5l){
+    // Below 5 EMA Low — no entry
+    return `<span style="font-size:.75rem">🚫</span>`;
+  }
+  if(t.ab5h){
+    // Above High
+    if(pctAboveH > 5.0) return nd(); // too far, not interested
+    return `<span class="go">APR ${htf} ▼ ${pct(pctAboveH)}%</span>`; // yellow approaching
+  }
+  // IN the band — show position (0%=at High, 100%=at Low)
+  if(t.inBand5){
+    const e5Range = t.pct5l + Math.abs(pctAboveH); // approximate band width
+    const pos = Math.abs(pctAboveH) / (e5Range || 1); // 0=top, 1=bottom
+    const bandPct = Math.round(pos * 100);
+    if(pos >= 0.6) return `<span style="color:var(--green)">IN ${htf} ${bandPct}%</span>`; // near Low = green
+    if(pos >= 0.3) return `<span style="color:var(--amber)">IN ${htf} ${bandPct}%</span>`; // mid = amber
+    return `<span class="go">IN ${htf} ${bandPct}%</span>`; // near High = yellow
+  }
+  return nd();
+}
+// ── BUILD CARD ────────────────────────────────────────────────────────────────
+function buildCard(res){
+  const {ticker, price, dailyBull, rvol, rvolTxt, tfs, tags} = res;
+  const rvolDisplay = rvolTxt;
+  const rvolStyle = rvol == null ? 'color:rgba(255,255,255,0.35)' :
+    rvol >= CFG.VOL_HIGH ? 'color:#00C853' :
+    rvol <= CFG.VOL_LOW  ? 'color:rgba(255,255,255,0.35)' :
+    'color:#ffffff';
+  const T = TF_KEYS.map(k=>tfs[k]);
+
+  const cells = (fn, ...args) => T.map((t,i)=>{
+    const sep = i===3?' swing-sep':i===6?' invest-sep':i===7?' invest-sep':'';
+    return `<div class="cell${sep}">${fn(t, TF_LABS[i], ...args)}</div>`;
+  }).join('');
+
+  const LABEL_COLORS = {
+    '200 EMA HIGH':    '#FFD700',
+    '200 EMA CLOSE':   '#FFD700',
+    '200 EMA LOW':     '#FFD700',
+    '100 EMA H/L':     '#FF6600',
+    '5 EMA LOW %':     '#00BFFF',
+    '5 EMA HTF BAND':  '#00BFFF',
+    '5 EMA CONT':      '#00C853',
+    '200 EMA SUPPORT': '#00C853',
+    '5 EMA CONTINUED':  '#00C853',
+    'VOLUME':          'rgba(255,255,255,0.7)',
+    'RSI':             'rgba(255,255,255,0.7)',
+    'VWAP':            'rgba(255,255,255,0.7)',
+  };
+  const row = (lbl, fn, bold=false, ...args) => {
+    const c = LABEL_COLORS[lbl] || 'rgba(255,255,255,0.8)';
+    const fw = bold ? 'font-weight:700;' : '';
+    return `<div class="crow"><div class="rlbl" style="${fw}color:${c}">${lbl}</div><div class="rgap"></div>${cells(fn,...args)}</div>`;
+  };
+
+  const sep = () =>
+    `<div class="crow sep-row"><div class="rlbl"></div><div class="rgap"></div>${T.map((_,i)=>`<div class="cell${i===3?' swing-sep':i===6?' invest-sep':''}" style="height:4px"></div>`).join('')}</div>`;
+
+  const priceColor = dailyBull ? 'var(--green)' : 'var(--red)';
+
+  return `<div class="card" data-tags="${tags}">
+    <!-- Row 1: Ticker + Section labels -->
+    <div style="display:flex">
+      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:90px;max-width:90px">${ticker} <span style="font-size:.48rem;font-weight:400;${rvolStyle};white-space:nowrap">${rvolDisplay}</span></div>
+      <div style="width:4px;background:var(--label-bg)"></div>
+      <div class="sec-label sec-trade" style="flex:3">── TRADE ──</div>
+      <div class="sec-label sec-swing" style="flex:3;border-left:2px solid rgba(255,255,255,0.10)">── SWING ──</div>
+      <div class="sec-label sec-invest" style="flex:2;border-left:2px solid rgba(255,255,255,0.10)">── INVEST ──</div>
+    </div>
+    <!-- Row 2: Price + RVOL + TF labels -->
+    <div style="display:flex">
+      <div style="min-width:90px;max-width:90px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
+        ${price?.toFixed(2)||'–'}
+      </div>
+      <div style="width:4px;background:var(--label-bg)"></div>
+      ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}" style="${i===3||i===6?'border-left:2px solid rgba(255,255,255,0.10)':''};">${TF_LABS[i]}</div>`).join('')}
+    </div>
+    ${sep()}
+    ${row('200 EMA HIGH',   c200High)}
+    ${row('200 EMA CLOSE',  c200Close)}
+    ${row('200 EMA LOW',    c200Low)}
+    ${sep()}
+    ${row('100 EMA H/L',    c100Band)}
+    ${sep()}
+    ${row('5 EMA LOW %',    c5Low)}
+    ${row('5 EMA HTF BAND', cHTFBand)}
+    ${sep()}
+    ${row('VOLUME',         cVol)}
+    ${sep()}
+    ${row('200 EMA SUPPORT',cAction,true)}
+    ${row('5 EMA CONTINUED',cCont5,true)}
+    ${sep()}
+  </div>`;
+}
+
+// ── FILTER ────────────────────────────────────────────────────────────────────
+function setF(btn,f){
+  curFilter=f;
+  document.querySelectorAll('.fbtn').forEach(b=>{
+    b.classList.remove('active');
+    b.classList.add('inactive');
+  });
+  btn.classList.add('active');
+  btn.classList.remove('inactive');
+  applyFilter();
+}
+function applyFilter(){
+  document.querySelectorAll('.card').forEach(c=>{
+    const tags=c.getAttribute('data-tags')||'ALL';
+    const match = curFilter==='ALL'||tags.includes(curFilter);
+    c.style.opacity = match ? '1' : '0.2';
+    c.style.filter  = match ? '' : 'grayscale(0.8)';
+  });
+}
+function openTV(t){window.open(`https://www.tradingview.com/chart/?symbol=${t}`,'_blank')}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderAll(){
+  const vals=Object.values(results).filter(Boolean);
+  const grid=document.getElementById('grid');
+  if(!vals.length){grid.innerHTML='<div style="padding:40px;text-align:center;color:var(--dim)">Scanning...</div>';return}
+  vals.sort((a,b)=>{
+    if(a.dailyBull!==b.dailyBull)return a.dailyBull?-1:1;
+    return(a.tfs.tf1d?.pct200??999)-(b.tfs.tf1d?.pct200??999);
+  });
+  grid.innerHTML=vals.map(buildCard).join('');
+  applyColVisibility();
+  applyFilter();
+  const bull=vals.filter(r=>r.dailyBull).length;
+  document.getElementById('cnt').textContent=`${vals.length} stocks | 🟢 ${bull} | 🔴 ${vals.length-bull}`;
+  if(failed.length){
+    document.getElementById('fs').style.display='block';
+    document.getElementById('fl').innerHTML=failed.map(t=>`<span class="fail-tag">${t}</span>`).join('');
+  }
+}
+
+// ── SCAN RUNNER ───────────────────────────────────────────────────────────────
+async function runScan(){
+  if(scanning)return;
+  scanning=true;failed=[];
+  document.getElementById('lb').classList.add('active');
+  document.getElementById('dot').classList.add('live');
+  document.getElementById('stat').textContent='Scanning...';
+  let done=0;
+  for(let i=0;i<TICKERS.length;i+=15){
+    const batch=TICKERS.slice(i,i+15);
+    const res=await Promise.all(batch.map(scan));
+    res.forEach((r,idx)=>{if(r)results[batch[idx]]=r;else failed.push(batch[idx]);done++});
+    document.getElementById('prog').textContent=`${done}/${TICKERS.length} scanned · ${Object.keys(results).length} loaded`;
+    renderAll();
+  }
+  scanning=false;
+  nextAt=Date.now()+CFG.REFRESH*1000;
+  document.getElementById('lb').classList.remove('active');
+  document.getElementById('stat').textContent='Live';
+  document.getElementById('lupd').textContent='Updated '+new Date().toLocaleTimeString();
+  document.getElementById('prog').textContent='';
+}
+
+
+// Column index map for TF toggling
+const TF_COL_INDEX = {'5m':0,'15m':1,'30m':2,'1H':3,'4H':4,'1D':5,'1W':6,'1M':7};
+let hiddenTFs  = new Set();
+let hiddenRows = new Set();
+
+function applyColVisibility(){
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(card=>{
+    // Toggle TF columns — each card has .cell elements in order
+    const rows = card.querySelectorAll('.crow');
+    rows.forEach(row=>{
+      const cells = row.querySelectorAll('.cell');
+      cells.forEach((cell,i)=>{
+        const tfLabel = TF_LABS[i];
+        cell.classList.toggle('col-hidden', hiddenTFs.has(tfLabel));
+      });
+    });
+    // Toggle TF header cells
+    card.querySelectorAll('.tick-tf').forEach((el,i)=>{
+      el.classList.toggle('col-hidden', hiddenTFs.has(TF_LABS[i]));
+    });
+    // Toggle rows by label
+    rows.forEach(row=>{
+      const lbl = row.querySelector('.rlbl')?.textContent?.trim();
+      if(lbl) row.classList.toggle('row-hidden', hiddenRows.has(lbl));
+    });
+  });
+}
+
+function toggleTF(btn, tf){
+  btn.classList.toggle('active');
+  if(hiddenTFs.has(tf)) hiddenTFs.delete(tf);
+  else hiddenTFs.add(tf);
+  applyColVisibility();
+}
+
+function toggleRow(btn, rowName){
+  btn.classList.toggle('active');
+  if(hiddenRows.has(rowName)) hiddenRows.delete(rowName);
+  else hiddenRows.add(rowName);
+  applyColVisibility();
+}
+
+// Auto-scan on load, refresh every 5 min
+runScan();
+setInterval(()=>{ if(!scanning) runScan(); }, 300000);
+</script>
+
+<div id="info-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#0d1420;border:1px solid rgba(255,255,255,0.2);border-radius:6px;max-width:520px;width:100%;padding:24px;font-size:.65rem;line-height:1.8;color:rgba(255,255,255,0.85)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-family:Syne,sans-serif;font-size:1rem;font-weight:800;color:#00C853">HOW TO USE EMA SCANNER</span>
+      <button onclick="document.getElementById('info-modal').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <p style="color:#FFD700;font-weight:700;margin-bottom:8px">200 EMA SYSTEM</p>
+    <p><span style="color:#FFD700">200 EMA CLOSE</span> — Green background = price above 200 EMA (bullish). Red = below (bearish). This is your primary trend filter.</p>
+    <p style="margin-top:6px"><span style="color:#FFD700">200 EMA HIGH</span> — APR = price approaching the top of the 200 EMA band. IN = inside the band. 🫣 = fallen below close.</p>
+    <p style="margin-top:6px"><span style="color:#FFD700">200 EMA LOW</span> — Shows % above the low when between close and low. 🚫 = price has broken below the 200 EMA low — no entry.</p>
+    <p style="color:#FF6600;font-weight:700;margin:10px 0 6px">100 EMA H/L BAND</p>
+    <p>APR = approaching from above within 2%. ▲ % LOW = inside band, showing how far above the low support you are.</p>
+    <p style="color:#00BFFF;font-weight:700;margin:10px 0 6px">5 EMA LOW %</p>
+    <p>Green background = price above the 5 EMA Low — potential entry zone. 🚫 = below the 5 EMA Low — wait.</p>
+    <p style="color:#00C853;font-weight:700;margin:10px 0 6px">200 EMA SUPPORT / 5 EMA CONT</p>
+    <p><span style="color:#00C853">SUPPORT</span> = EMA holding, conditions met for entry. <span style="color:#FFD700">WATCH</span> = approaching key level, prepare.</p>
+    <p style="color:rgba(255,255,255,0.4);margin-top:14px;font-size:.58rem">Data: Tiingo · Auto-refreshes every 5 minutes · Not financial advice</p>
+  </div>
+</div>
+</body>
+</html>
