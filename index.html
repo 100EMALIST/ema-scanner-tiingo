@@ -699,36 +699,7 @@ function renderAll(){
   });
   grid.innerHTML=vals.map(buildCard).join('');
   applyColVisibility();
-  
-applyWL();
-let hiddenTFs = new Set();
-// TF → section mapping
-const TF_SECTION = {'5m':'trade','15m':'trade','30m':'trade','1H':'swing','4H':'swing','1D':'swing','1W':'invest','1M':'invest'};
-
-function toggleTF(btn, tf){
-  btn.classList.toggle('active');
-  if(hiddenTFs.has(tf)) hiddenTFs.delete(tf); else hiddenTFs.add(tf);
-
-  // Hide/show data cells and TF header cells
-  TF_LABS.forEach((label,i)=>{
-    document.querySelectorAll(`[data-tfi="${i}"]`).forEach(el=>{
-      el.classList.toggle('col-hidden', hiddenTFs.has(label));
-    });
-  });
-
-  // Update section headers — hide if ALL TFs in that section are hidden
-  const sections = {
-    trade: ['5m','15m','30m'],
-    swing: ['1H','4H','1D'],
-    invest: ['1W','1M']
-  };
-  document.querySelectorAll('.sec-label').forEach(el=>{
-    const sec = [...el.classList].find(c=>c.startsWith('sec-') && c!=='sec-label')?.replace('sec-','');
-    if(!sec) return;
-    const allHidden = sections[sec].every(t=>hiddenTFs.has(t));
-    el.classList.toggle('col-hidden', allHidden);
-  });
-}
+  applyWL();
   applyFilter();
   const bull=vals.filter(r=>r.dailyBull).length;
   document.getElementById('cnt').textContent=`${vals.length} stocks | 🟢 ${bull} | 🔴 ${vals.length-bull}`;
@@ -824,6 +795,15 @@ function applyWL(){
   masterWL.forEach(ticker=>{
     const btn = document.getElementById('wlb-'+ticker);
     if(btn){ btn.textContent='★ IN WATCHLIST'; btn.classList.add('active'); }
+  });
+}
+
+
+function applyColVisibility(){
+  TF_LABS.forEach((label,i)=>{
+    document.querySelectorAll('[data-tfi="'+i+'"]').forEach(el=>{
+      el.classList.toggle('col-hidden', hiddenTFs.has(label));
+    });
   });
 }
 
