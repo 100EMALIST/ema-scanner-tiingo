@@ -51,7 +51,7 @@
 
   /* TICKER ROW */
   .tick-row{display:flex;background:var(--label-bg)}
-  .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 90px}
+  .tick-name{padding:5px 8px;font-weight:700;font-size:.78rem;cursor:pointer;flex:0 0 90px;white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:4px}
   .tick-name:hover{background:#252540}.tick-name.bull{color:var(--green)}.tick-name.bear{color:var(--red)}
   .tick-gap{width:4px;background:var(--label-bg)}
   .tick-tf{padding:4px 2px;text-align:center;font-weight:700;font-size:.7rem;letter-spacing:.05em;flex:1;display:flex;align-items:center;justify-content:center}
@@ -449,7 +449,7 @@ function buildCard(res){
   return `<div class="card" data-tags="${tags}">
     <!-- Row 1: Ticker + Section labels -->
     <div style="display:flex">
-      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:90px;max-width:90px">${ticker} <span style="font-size:.5rem;font-weight:400;${rvolStyle}">${rvolDisplay}</span></div>
+      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:90px;max-width:90px">${ticker} <span style="font-size:.48rem;font-weight:400;${rvolStyle};white-space:nowrap">${rvolDisplay}</span></div>
       <div style="width:4px;background:var(--label-bg)"></div>
       <div class="sec-label sec-trade" style="flex:3">── TRADE ──</div>
       <div class="sec-label sec-swing" style="flex:3;border-left:2px solid rgba(255,255,255,0.10)">── SWING ──</div>
