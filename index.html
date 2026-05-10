@@ -638,21 +638,19 @@ function buildCard(res){
   const priceColor = dailyBull ? 'var(--green)' : 'var(--red)';
 
   return `<div class="card" data-tags="${tags}" data-ticker="${ticker}">
-    <!-- Row 1: Ticker + Section labels -->
+    <!-- Row 1: Ticker + TF labels -->
     <div style="display:flex">
       <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:90px;max-width:90px">${ticker} <span style="font-size:.48rem;font-weight:400;${rvolStyle};white-space:nowrap">${rvolDisplay}</span></div>
       <div style="width:4px;background:var(--label-bg)"></div>
-      <div class="sec-label sec-trade" style="flex:3">── TRADE ──</div>
-      <div class="sec-label sec-swing" style="flex:3;border-left:2px solid rgba(255,255,255,0.10)">── SWING ──</div>
-      <div class="sec-label sec-invest" style="flex:2;border-left:2px solid rgba(255,255,255,0.10)">── INVEST ──</div>
+      ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}" data-tfi="${i}">${TF_LABS[i]}</div>`).join('')}
     </div>
-    <!-- Row 2: Price + RVOL + TF labels -->
+    <!-- Row 2: Price -->
     <div style="display:flex">
       <div style="min-width:90px;max-width:90px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px">
         ${price?.toFixed(2)||'–'}
       </div>
       <div style="width:4px;background:var(--label-bg)"></div>
-      ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}" style="${i===3||i===6?'border-left:2px solid rgba(255,255,255,0.10)':''};">${TF_LABS[i]}</div>`).join('')}
+      ${TF_KEYS.map((_,i)=>`<div class="price-tf" data-tfi="${i}"></div>`).join('')}
     </div>
     ${sep()}
     ${row('200 EMA HIGH',   c200High)}
