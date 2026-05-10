@@ -150,11 +150,18 @@ setInterval(()=>{
 },1000);
 
 // Fetch
+const TIINGO_TOKEN = '4669bd81d63093e01dd88436069107820a0730ae';
+
 async function fetchT(ticker, interval, startDate){
   try{
-    const r=await fetch(`/api/tiingo?ticker=${ticker}&interval=${interval}&startDate=${startDate}`,{signal:AbortSignal.timeout(15000)});
-    return r.ok?await r.json():null;
-  }catch{return null}
+    const safeTicker = ticker.replace(/[^A-Za-z0-9.\-]/g,'').toUpperCase();
+    const url = `https://api.tiingo.com/tiingo/daily/${safeTicker}/prices?startDate=${startDate}&resampleFreq=${interval}&token=${TIINGO_TOKEN}`;
+    const r = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(15000)
+    });
+    return r.ok ? await r.json() : null;
+  }catch(e){ console.error(ticker, e); return null; }
 }
 
 function bars(d){
