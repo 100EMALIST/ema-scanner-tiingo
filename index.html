@@ -407,6 +407,15 @@ function cVWAP(t){
   return `<span style="color:${v>0?'var(--green)':'var(--red)'}">${v>0?'▲':'▼'} ${a}%</span>`;
 }
 
+
+function cHTFBand(t, tfLabel){
+  if(!t||t.ab5l==null)return nd();
+  // Proxy: use 5 EMA of highs vs current price for HTF band logic
+  // Shows APR when approaching from above, IN when inside, below = red
+  if(!t.ab5l) return `<span style="color:var(--red);font-size:.65rem">▼ ${pct(t.pct5l??0)}%</span>`;
+  if(t.pct5l!=null && t.pct5l<=5) return `<span class="go">APR ${tfLabel} ▼ ${pct(t.pct5l)}%</span>`;
+  return nd();
+}
 // ── BUILD CARD ────────────────────────────────────────────────────────────────
 function buildCard(res){
   const {ticker, price, dailyBull, rvol, rvolTxt, tfs, tags} = res;
@@ -428,6 +437,7 @@ function buildCard(res){
     '200 EMA LOW':     '#FFD700',
     '100 EMA H/L':     '#FF6600',
     '5 EMA LOW %':     '#00BFFF',
+    '5 EMA HTF BAND':  '#00BFFF',
     '5 EMA CONT':      '#00C853',
     '200 EMA SUPPORT': '#00C853',
     '5 EMA CONTINUED':  '#00C853',
@@ -471,6 +481,7 @@ function buildCard(res){
     ${row('100 EMA H/L',    c100Band)}
     ${sep()}
     ${row('5 EMA LOW %',    c5Low)}
+    ${row('5 EMA HTF BAND', cHTFBand)}
     ${sep()}
     ${row('VOLUME',         cVol)}
     ${sep()}
