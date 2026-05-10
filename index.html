@@ -27,8 +27,10 @@
   @keyframes scan{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
   .prog{font-size:.6rem;color:var(--dim);padding:3px 16px;min-height:16px}
   .filters{display:flex;gap:5px;padding:6px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
-  .fbtn{padding:3px 9px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:.6rem;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.05em}
-  .fbtn:hover{border-color:var(--green);color:var(--green)}.fbtn.active{background:var(--green);border-color:var(--green);color:#000;font-weight:700}
+  .fbtn{padding:3px 9px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);font-family:'JetBrains Mono',monospace;font-size:.6rem;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.05em}
+  .fbtn:hover{border-color:var(--green);color:var(--green)}
+  .fbtn.active{background:var(--green);border-color:var(--green);color:#000;font-weight:700}
+  .fbtn.inactive{opacity:0.35}
   .wrap{padding:10px 14px;overflow-x:auto}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(600px,1fr));gap:6px}
 
@@ -408,13 +410,20 @@ function cVWAP(t){
 }
 
 
+// HTF label map — shows NEXT timeframe up
+const HTF_LABEL_MAP = {
+  '30m':'1H', '1H':'4H', '4H':'1D', '1D':'1W', '1W':'1M', '1M':'–'
+};
+
 function cHTFBand(t, tfLabel){
-  if(!t||t.ab5l==null)return nd();
-  // Proxy: use 5 EMA of highs vs current price for HTF band logic
-  // Shows APR when approaching from above, IN when inside, below = red
-  if(!t.ab5l) return `<span style="color:var(--red);font-size:.65rem">▼ ${pct(t.pct5l??0)}%</span>`;
-  if(t.pct5l!=null && t.pct5l<=5) return `<span class="go">APR ${tfLabel} ▼ ${pct(t.pct5l)}%</span>`;
-  return nd();
+  // 5m and 15m — not applicable
+  if(tfLabel==='5m'||tfLabel==='15m') return nd();
+  const htfLabel = HTF_LABEL_MAP[tfLabel] || '–';
+  if(!t||t.pct5l==null) return nd();
+  // Only activate within 2%
+  if(t.pct5l > 2.0) return nd();
+  if(!t.ab5l) return `<span style="color:var(--red)">▼ ${pct(t.pct5l)}% ${htfLabel}</span>`;
+  return `<span class="go">APR ${htfLabel} ▼ ${pct(t.pct5l)}%</span>`;
 }
 // ── BUILD CARD ────────────────────────────────────────────────────────────────
 function buildCard(res){
@@ -494,13 +503,20 @@ function buildCard(res){
 // ── FILTER ────────────────────────────────────────────────────────────────────
 function setF(btn,f){
   curFilter=f;
-  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');applyFilter();
+  document.querySelectorAll('.fbtn').forEach(b=>{
+    b.classList.remove('active');
+    b.classList.add('inactive');
+  });
+  btn.classList.add('active');
+  btn.classList.remove('inactive');
+  applyFilter();
 }
 function applyFilter(){
   document.querySelectorAll('.card').forEach(c=>{
     const tags=c.getAttribute('data-tags')||'ALL';
-    c.style.display=(curFilter==='ALL'||tags.includes(curFilter))?'':'none';
+    const match = curFilter==='ALL'||tags.includes(curFilter);
+    c.style.opacity = match ? '1' : '0.2';
+    c.style.filter  = match ? '' : 'grayscale(0.8)';
   });
 }
 function openTV(t){window.open(`https://www.tradingview.com/chart/?symbol=${t}`,'_blank')}
