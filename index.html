@@ -163,10 +163,10 @@ function bars(d){
   try{
     if(!Array.isArray(d)||d.length===0)return[];
     return d.map(b=>({
-      h: b.adjHigh ?? b.high ?? b.close ?? b.adjClose,
-      l: b.adjLow  ?? b.low  ?? b.close ?? b.adjClose,
-      c: b.adjClose ?? b.close,
-      v: b.adjVolume ?? b.volume ?? 0
+      h: b.high,
+      l: b.low,
+      c: b.close,
+      v: b.volume ?? 0
     })).filter(x=>x.c!=null&&x.h!=null&&x.l!=null);
   }catch(e){console.error('bars error',e);return[]}
 }
