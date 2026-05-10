@@ -49,7 +49,7 @@
   .cell{padding:3px 2px;text-align:center;font-size:.6rem;display:flex;align-items:center;justify-content:center;border-left:1px solid rgba(255,255,255,0.05);flex:1;min-width:0;background:var(--dark)}
   .sep-row .rlbl,.sep-row .rgap,.sep-row .cell{height:4px;padding:0;background:rgba(255,255,255,0.10)!important}
   .swing-sep{border-left:none!important}
-  .invest-sep{border-left:2px solid rgba(255,255,255,0.10)!important}
+  .invest-sep{border-left:none!important}
 
   /* TICKER ROW */
   .tick-row{display:flex;background:var(--label-bg)}
@@ -81,18 +81,6 @@
   .fail-section h3{color:#ff4444;margin-bottom:4px}
   .fail-list{display:flex;flex-wrap:wrap;gap:4px}
   .fail-tag{background:#1a0000;border:1px solid #660000;color:#ff6666;padding:1px 6px;border-radius:2px;font-size:.58rem}
-  .tbtn{padding:2px 7px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);font-family:'JetBrains Mono',monospace;font-size:.58rem;cursor:pointer;transition:all .15s}
-  .tbtn.active{background:rgba(0,200,83,0.2);border-color:var(--green);color:var(--green)}
-  .tbtn:hover{border-color:rgba(255,255,255,0.4);color:rgba(255,255,255,0.8)}
-  .col-hidden{display:none!important}
-  .wl-bar{display:flex;gap:3px;padding:3px 5px;background:rgba(0,0,0,0.3);border-top:1px solid rgba(255,255,255,0.06)}
-  .wl-btn{padding:1px 6px;border-radius:2px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.4);font-family:'JetBrains Mono',monospace;font-size:.52rem;cursor:pointer;transition:all .15s}
-  .wl-btn:hover{border-color:rgba(255,255,255,0.5);color:rgba(255,255,255,0.8)}
-  .wl-btn.wl-fv{background:rgba(0,191,255,0.25);border-color:#00BFFF;color:#00BFFF}
-  .wl-btn.wl-ya{background:rgba(180,0,255,0.25);border-color:#CC00FF;color:#CC00FF}
-  .wl-btn.wl-hg{background:rgba(255,50,50,0.25);border-color:#FF3232;color:#FF3232}
-  .col-hidden{display:none!important}
-  .row-hidden{display:none!important}
   footer{padding:8px 16px;font-size:.55rem;color:var(--dim);border-top:1px solid var(--border);margin-top:8px}
 </style>
 </head>
@@ -112,9 +100,6 @@
 <div class="prog" id="prog"></div>
 
 
-<div id="toggle-panel" style="display:none;padding:8px 14px;background:#111;border-bottom:1px solid #333;flex-wrap:wrap;gap:12px">
-  <div>
-    <div style="font-size:.55rem;color:rgba(255,255,255,0.4);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Timeframes</div>
     <div style="display:flex;gap:4px;flex-wrap:wrap" id="tf-toggles">
       <button class="tbtn active" data-tf="5m" onclick="toggleTF(this,'5m')">5m</button>
       <button class="tbtn active" data-tf="15m" onclick="toggleTF(this,'15m')">15m</button>
@@ -141,19 +126,27 @@
     </div>
   </div>
 </div>
+<div style="display:flex;align-items:center;gap:5px;padding:5px 14px;background:#111;border-bottom:1px solid #2a2a2a;flex-wrap:wrap">
+  <span style="font-size:.55rem;color:rgba(255,255,255,0.35);margin-right:2px;text-transform:uppercase;letter-spacing:.05em">Columns:</span>
+  <button class="tbtn active" onclick="toggleTF(this,'5m')">5m</button>
+  <button class="tbtn active" onclick="toggleTF(this,'15m')">15m</button>
+  <button class="tbtn active" onclick="toggleTF(this,'30m')">30m</button>
+  <button class="tbtn active" onclick="toggleTF(this,'1H')">1H</button>
+  <button class="tbtn active" onclick="toggleTF(this,'4H')">4H</button>
+  <button class="tbtn active" onclick="toggleTF(this,'1D')">1D</button>
+  <button class="tbtn active" onclick="toggleTF(this,'1W')">1W</button>
+  <button class="tbtn active" onclick="toggleTF(this,'1M')">1M</button>
+</div>
 <div class="filters">
   <button class="fbtn active" onclick="setF(this,'ALL')">ALL</button>
-  <button class="fbtn" onclick="document.getElementById('toggle-panel').style.display=document.getElementById('toggle-panel').style.display==='none'?'flex':'none'" style="margin-left:auto">⚙ COLUMNS</button>
   <button class="fbtn" onclick="setF(this,'BULL')">🟢 BULL</button>
   <button class="fbtn" onclick="setF(this,'BEAR')">🔴 BEAR</button>
   <button class="fbtn" onclick="setF(this,'SUPPORT')">SUPPORT</button>
   <button class="fbtn" onclick="setF(this,'WATCH')">WATCH</button>
   <button class="fbtn" onclick="setF(this,'HIGH_VOL')">HIGH VOL</button>
-  <span style="color:rgba(255,255,255,0.2);margin:0 2px">|</span>
-  <button class="fbtn" onclick="setF(this,'FV')" style="color:#00BFFF;border-color:#00BFFF">★ FV</button>
-  <button class="fbtn" onclick="setF(this,'YA')" style="color:#CC00FF;border-color:#CC00FF">★ YA</button>
-  <button class="fbtn" onclick="setF(this,'HG')" style="color:#FF3232;border-color:#FF3232">★ HG</button>
   <button class="fbtn" onclick="setF(this,'NEAR')">NEAR 200</button>
+  <span style="color:rgba(255,255,255,0.2);margin:0 2px">|</span>
+  <button class="fbtn" onclick="setF(this,'WL')" style="color:#00BFFF;border-color:#00BFFF">★ WATCHLIST</button>
 </div>
 
 <div class="wrap">
@@ -290,7 +283,7 @@ const CFG = {
   VOL_HIGH:1.5, VOL_LOW:0.8,
   RSI_OS:30, RSI_OB:70,
   REFRESH:300,
-  CONT_BUY:5, CONT_WATCH:10, REV_WATCH:15,
+  CONT_BUY:5, CONT_WATCH:10, REV_WATCH:15,  // 5% = entry trigger
   WARN_PCT:3.0, FIRE_PCT:1.0,
 };
 
@@ -462,6 +455,7 @@ async function scan(ticker){
     if(Object.values(tfs).some(t=>t?.mtfLong))tags.push('MTF');
     if(tfs.tf1d?.pct200!=null&&tfs.tf1d.pct200<=5)tags.push('NEAR');
     if(Object.values(tfs).some(t=>t?.rv!=null&&t.rv>=CFG.VOL_HIGH))tags.push('HIGH_VOL');
+    if(masterWL.has(ticker))tags.push('WL');
     WL_NAMES.forEach(wl=>{ if(watchlists[wl].has(ticker)) tags.push(wl); });
 
     return {ticker, price, dailyBull, rvol, rvolTxt, tfs, tags:tags.join(',')};
@@ -666,6 +660,9 @@ function buildCard(res){
     ${row('200 EMA SUPPORT',cAction,true)}
     ${row('5 EMA CONTINUED',cCont5,true)}
     ${sep()}
+    <div class="wl-bar">
+      <button class="wl-btn" id="wlb-\${ticker}" onclick="toggleWL('\${ticker}')">☆ ADD TO WATCHLIST</button>
+    </div>
   </div>`;
 }
 
@@ -701,7 +698,36 @@ function renderAll(){
   });
   grid.innerHTML=vals.map(buildCard).join('');
   applyColVisibility();
-  applyWLStyles();
+  
+applyWL();
+let hiddenTFs = new Set();
+// TF → section mapping
+const TF_SECTION = {'5m':'trade','15m':'trade','30m':'trade','1H':'swing','4H':'swing','1D':'swing','1W':'invest','1M':'invest'};
+
+function toggleTF(btn, tf){
+  btn.classList.toggle('active');
+  if(hiddenTFs.has(tf)) hiddenTFs.delete(tf); else hiddenTFs.add(tf);
+
+  // Hide/show data cells and TF header cells
+  TF_LABS.forEach((label,i)=>{
+    document.querySelectorAll(`[data-tfi="${i}"]`).forEach(el=>{
+      el.classList.toggle('col-hidden', hiddenTFs.has(label));
+    });
+  });
+
+  // Update section headers — hide if ALL TFs in that section are hidden
+  const sections = {
+    trade: ['5m','15m','30m'],
+    swing: ['1H','4H','1D'],
+    invest: ['1W','1M']
+  };
+  document.querySelectorAll('.sec-label').forEach(el=>{
+    const sec = [...el.classList].find(c=>c.startsWith('sec-') && c!=='sec-label')?.replace('sec-','');
+    if(!sec) return;
+    const allHidden = sections[sec].every(t=>hiddenTFs.has(t));
+    el.classList.toggle('col-hidden', allHidden);
+  });
+}
   applyFilter();
   const bull=vals.filter(r=>r.dailyBull).length;
   document.getElementById('cnt').textContent=`${vals.length} stocks | 🟢 ${bull} | 🔴 ${vals.length-bull}`;
@@ -736,92 +762,39 @@ async function runScan(){
 
 
 
-// ── WATCHLISTS (persisted in localStorage) ───────────────────────────────
-const WL_NAMES = ['FV','YA','HG'];
-let watchlists = {FV:new Set(), YA:new Set(), HG:new Set()};
 
-function loadWL(){
-  WL_NAMES.forEach(wl=>{
-    const saved = localStorage.getItem('wl_'+wl);
-    if(saved) watchlists[wl] = new Set(JSON.parse(saved));
-  });
-}
-function saveWL(wl){
-  localStorage.setItem('wl_'+wl, JSON.stringify([...watchlists[wl]]));
-}
-function toggleWL(ticker, wl){
-  if(watchlists[wl].has(ticker)){
-    watchlists[wl].delete(ticker);
-  } else {
-    watchlists[wl].add(ticker);
-  }
-  saveWL(wl);
-  applyWLStyles();
-  // Update card tags for filtering
-  const card = document.querySelector(`.card[data-ticker="${ticker}"]`);
-  if(card){
-    const tags = card.getAttribute('data-tags');
-    const newTags = WL_NAMES.reduce((acc,w)=>{
-      const has = watchlists[w].has(ticker);
-      const cur = acc.includes(w);
-      if(has && !cur) return acc+','+w;
-      if(!has && cur) return acc.split(',').filter(t=>t!==w).join(',');
-      return acc;
-    }, tags);
-    card.setAttribute('data-tags', newTags);
-    applyFilter();
-  }
-}
-function applyWLStyles(){
-  WL_NAMES.forEach(wl=>{
-    watchlists[wl].forEach(ticker=>{
-      const btn = document.getElementById('wl-'+wl.toLowerCase()+'-'+ticker);
-      if(btn) btn.classList.add('wl-'+wl.toLowerCase());
-    });
-    // Remove style from unselected
-    document.querySelectorAll(`.wl-btn[id^="wl-${wl.toLowerCase()}-"]`).forEach(btn=>{
-      const t = btn.id.replace('wl-'+wl.toLowerCase()+'-','');
-      if(!watchlists[wl].has(t)) btn.classList.remove('wl-'+wl.toLowerCase());
-    });
-  });
-}
-loadWL();
 
-// Column index map for TF toggling
-const TF_COL_INDEX = {'5m':0,'15m':1,'30m':2,'1H':3,'4H':4,'1D':5,'1W':6,'1M':7};
-let hiddenTFs  = new Set();
-let hiddenRows = new Set();
 
-function applyColVisibility(){
-  const cards = document.querySelectorAll('.card');
-  cards.forEach(card=>{
-    // Toggle TF columns — each card has .cell elements in order
-    const rows = card.querySelectorAll('.crow');
-    rows.forEach(row=>{
-      const cells = row.querySelectorAll('.cell');
-      cells.forEach((cell,i)=>{
-        const tfLabel = TF_LABS[i];
-        cell.classList.toggle('col-hidden', hiddenTFs.has(tfLabel));
-      });
-    });
-    // Toggle TF header cells
-    card.querySelectorAll('.tick-tf').forEach((el,i)=>{
-      el.classList.toggle('col-hidden', hiddenTFs.has(TF_LABS[i]));
-    });
-    // Toggle rows by label
-    rows.forEach(row=>{
-      const lbl = row.querySelector('.rlbl')?.textContent?.trim();
-      if(lbl) row.classList.toggle('row-hidden', hiddenRows.has(lbl));
-    });
-  });
-}
+let hiddenTFs = new Set();
+// TF → section mapping
+const TF_SECTION = {'5m':'trade','15m':'trade','30m':'trade','1H':'swing','4H':'swing','1D':'swing','1W':'invest','1M':'invest'};
 
 function toggleTF(btn, tf){
   btn.classList.toggle('active');
-  if(hiddenTFs.has(tf)) hiddenTFs.delete(tf);
-  else hiddenTFs.add(tf);
-  applyColVisibility();
-  applyWLStyles();
+  if(hiddenTFs.has(tf)) hiddenTFs.delete(tf); else hiddenTFs.add(tf);
+
+  // Hide/show data cells and TF header cells
+  TF_LABS.forEach((label,i)=>{
+    document.querySelectorAll(`[data-tfi="${i}"]`).forEach(el=>{
+      el.classList.toggle('col-hidden', hiddenTFs.has(label));
+    });
+  });
+
+  // Update section headers — hide if ALL TFs in that section are hidden
+  const sections = {
+    trade: ['5m','15m','30m'],
+    swing: ['1H','4H','1D'],
+    invest: ['1W','1M']
+  };
+  document.querySelectorAll('.sec-label').forEach(el=>{
+    const sec = [...el.classList].find(c=>c.startsWith('sec-') && c!=='sec-label')?.replace('sec-','');
+    if(!sec) return;
+    const allHidden = sections[sec].every(t=>hiddenTFs.has(t));
+    el.classList.toggle('col-hidden', allHidden);
+  });
+}
+
+applyWL();
 }
 
 function toggleRow(btn, rowName){
@@ -829,7 +802,71 @@ function toggleRow(btn, rowName){
   if(hiddenRows.has(rowName)) hiddenRows.delete(rowName);
   else hiddenRows.add(rowName);
   applyColVisibility();
-  applyWLStyles();
+  
+let hiddenTFs = new Set();
+// TF → section mapping
+const TF_SECTION = {'5m':'trade','15m':'trade','30m':'trade','1H':'swing','4H':'swing','1D':'swing','1W':'invest','1M':'invest'};
+
+function toggleTF(btn, tf){
+  btn.classList.toggle('active');
+  if(hiddenTFs.has(tf)) hiddenTFs.delete(tf); else hiddenTFs.add(tf);
+
+  // Hide/show data cells and TF header cells
+  TF_LABS.forEach((label,i)=>{
+    document.querySelectorAll(`[data-tfi="${i}"]`).forEach(el=>{
+      el.classList.toggle('col-hidden', hiddenTFs.has(label));
+    });
+  });
+
+  // Update section headers — hide if ALL TFs in that section are hidden
+  const sections = {
+    trade: ['5m','15m','30m'],
+    swing: ['1H','4H','1D'],
+    invest: ['1W','1M']
+  };
+  document.querySelectorAll('.sec-label').forEach(el=>{
+    const sec = [...el.classList].find(c=>c.startsWith('sec-') && c!=='sec-label')?.replace('sec-','');
+    if(!sec) return;
+    const allHidden = sections[sec].every(t=>hiddenTFs.has(t));
+    el.classList.toggle('col-hidden', allHidden);
+  });
+}
+
+applyWL();
+}
+
+
+// ── MASTER WATCHLIST ─────────────────────────────────────────────────────
+let masterWL = new Set(JSON.parse(localStorage.getItem('masterWL')||'[]'));
+
+function saveWL(){ localStorage.setItem('masterWL', JSON.stringify([...masterWL])); }
+
+function toggleWL(ticker){
+  const btn = document.getElementById('wlb-'+ticker);
+  if(masterWL.has(ticker)){
+    masterWL.delete(ticker);
+    if(btn){ btn.textContent='☆ ADD TO WATCHLIST'; btn.classList.remove('active'); }
+  } else {
+    masterWL.add(ticker);
+    if(btn){ btn.textContent='★ IN WATCHLIST'; btn.classList.add('active'); }
+  }
+  saveWL();
+  // Update card tag
+  const card = document.querySelector(`.card[data-ticker="${ticker}"]`);
+  if(card){
+    let tags = card.getAttribute('data-tags');
+    if(masterWL.has(ticker) && !tags.includes('WL')) tags+=',WL';
+    if(!masterWL.has(ticker)) tags=tags.split(',').filter(t=>t!=='WL').join(',');
+    card.setAttribute('data-tags',tags);
+    applyFilter();
+  }
+}
+
+function applyWL(){
+  masterWL.forEach(ticker=>{
+    const btn = document.getElementById('wlb-'+ticker);
+    if(btn){ btn.textContent='★ IN WATCHLIST'; btn.classList.add('active'); }
+  });
 }
 
 // Auto-scan on load, refresh every 5 min
@@ -853,7 +890,11 @@ setInterval(()=>{ if(!scanning) runScan(); }, 300000);
     <p>Green background = price above the 5 EMA Low — potential entry zone. 🚫 = below the 5 EMA Low — wait.</p>
     <p style="color:#00C853;font-weight:700;margin:10px 0 6px">200 EMA SUPPORT / 5 EMA CONT</p>
     <p><span style="color:#00C853">SUPPORT</span> = EMA holding, conditions met for entry. <span style="color:#FFD700">WATCH</span> = approaching key level, prepare.</p>
-    <p style="color:rgba(255,255,255,0.4);margin-top:14px;font-size:.58rem">Data: Tiingo · Auto-refreshes every 5 minutes · Not financial advice</p>
+    <p style="color:#FFD700;font-weight:700;margin:10px 0 6px">⚙ USING THE SCANNER</p>
+    <p>Click <strong style="color:#fff">⚙ COLUMNS</strong> to toggle any row or timeframe on/off. Changes apply instantly across all cards.</p>
+    <p style="margin-top:6px">Click <strong style="color:#fff">★ FV / YA / HG</strong> on any card to add it to your watchlist. Click the same button in the filter bar to show only that watchlist.</p>
+    <p style="margin-top:6px">Click any <strong style="color:#fff">ticker name</strong> to open it directly in TradingView.</p>
+    <p style="color:rgba(255,255,255,0.4);margin-top:14px;font-size:.58rem">Data: Tiingo · Auto-refreshes every 5 minutes · 5 EMA trigger = within 5% · Not financial advice</p>
   </div>
 </div>
 </body>
