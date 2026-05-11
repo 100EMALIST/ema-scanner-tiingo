@@ -638,10 +638,9 @@ function buildCard(res){
   const priceColor = dailyBull ? 'var(--green)' : 'var(--red)';
 
   return `<div class="card" data-tags="${tags}" data-ticker="${ticker}">
-    <!-- Row 1: Ticker (full label-bg) -->
-    <div style="display:flex;background:var(--label-bg)">
-      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="min-width:90px;max-width:90px">${ticker} <span style="font-size:.48rem;font-weight:400;${rvolStyle};white-space:nowrap">${rvolDisplay}</span></div>
-      <div style="flex:1;background:var(--label-bg)"></div>
+    <!-- Row 1: Ticker full width label-bg -->
+    <div style="display:flex;background:var(--label-bg);width:100%">
+      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="flex:1;max-width:100%">${ticker} <span style="font-size:.48rem;font-weight:400;${rvolStyle};white-space:nowrap">${rvolDisplay}</span></div>
     </div>
     <!-- Row 2: Price + star + TF labels -->
     <div style="display:flex">
@@ -652,7 +651,6 @@ function buildCard(res){
       <div style="width:4px;background:var(--label-bg)"></div>
       ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}" data-tfi="${i}">${TF_LABS[i]}</div>`).join('')}
     </div>
-    ${sep()}
     ${row('200 EMA HIGH',   c200High)}
     ${row('200 EMA CLOSE',  c200Close)}
     ${row('200 EMA LOW',    c200Low)}
