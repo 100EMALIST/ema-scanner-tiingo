@@ -431,7 +431,9 @@ async function scan(ticker){
     const b1d=bars(d1d), b1w=bars(d1w), b5m=bars(d5m), b1M=bars(d1M);
     if(b1d.length<60)return null;
 
-    const price    = b1d[b1d.length-1].c;
+    // Get live price from IEX, fallback to last daily close
+    const liveP = await fetchLivePrice(ticker);
+    const price = liveP || b1d[b1d.length-1].c;
     const e200_1d  = EMA(b1d, 200);
     const dailyBull= e200_1d ? price > e200_1d : false;
     const rvol     = RVOL(b1d);
