@@ -146,8 +146,9 @@
   <button class="fbtn" onclick="setF(this,'HIGH_VOL')">HIGH VOL</button>
   <button class="fbtn" onclick="setF(this,'NEAR')">NEAR 200</button>
   <span style="color:rgba(255,255,255,0.2);margin:0 2px">|</span>
-  <button class="fbtn" onclick="setF(this,'WL')" style="color:#FF00FF;border-color:#FF00FF;display:inline-flex;align-items:center;gap:4px"><span style="font-size:1.1rem;line-height:1">★</span>WATCHLIST</button>
+  <button class="fbtn" onclick="setF(this,'WL')" style="color:#FF00FF;border-color:#FF00FF">WATCHLIST</button>
   <button class="fbtn" onclick="setF(this,'COMM')" style="color:#FF9100;border-color:#FF9100">⬥ COMMODITIES</button>
+  <button class="fbtn" onclick="setF(this,'CRYPTO')" style="color:#FF9100;border-color:#FF9100">⬥ CRYPTO</button>
 </div>
 
 <div class="wrap">
@@ -274,7 +275,8 @@ const TICKERS = [
   'XAGUSD',
   'XAUUSD',
   'BTCUSD',
-  'ETHUSD'
+  'ETHUSD',
+  'MARA'
 ];
 
 const CFG = {
@@ -455,6 +457,7 @@ async function scan(ticker){
     if(Object.values(tfs).some(t=>t?.rv!=null&&t.rv>=CFG.VOL_HIGH))tags.push('HIGH_VOL');
     if(masterWL.has(ticker))tags.push('WL');
     if(['XAUUSD','XAGUSD'].includes(ticker))tags.push('COMM');
+    if(['MSTR','MARA','ETHUSD','BTCUSD'].includes(ticker))tags.push('CRYPTO');
 
     return {ticker, price, dailyBull, rvol, rvolTxt, tfs, tags:tags.join(',')};
   }catch(e){console.error(ticker,e);return null}
@@ -669,7 +672,7 @@ function setF(btn,f){
   btn.classList.remove('inactive');
   // COMM mode — 2 cards side by side, full focus
   const grid = document.getElementById('grid');
-  if(f==='COMM'){
+  if(f==='COMM'||f==='CRYPTO'||f==='WL'){
     grid.style.gridTemplateColumns='repeat(2,1fr)';
     grid.style.maxWidth='1300px';
     grid.style.margin='0 auto';
@@ -681,11 +684,20 @@ function setF(btn,f){
   applyFilter();
 }
 function applyFilter(){
+  const exclusive = ['COMM','CRYPTO','WL'];
   document.querySelectorAll('.card').forEach(c=>{
     const tags=c.getAttribute('data-tags')||'ALL';
     const match = curFilter==='ALL'||tags.includes(curFilter);
-    c.style.opacity = match ? '1' : '0.2';
-    c.style.filter  = match ? '' : 'grayscale(0.8)';
+    if(exclusive.includes(curFilter)){
+      // Hard hide — only show exact matches
+      c.style.display = match ? '' : 'none';
+      c.style.opacity = '1';
+      c.style.filter  = '';
+    } else {
+      c.style.display = '';
+      c.style.opacity = match ? '1' : '0.2';
+      c.style.filter  = match ? '' : 'grayscale(0.8)';
+    }
   });
 }
 const TV_TF = {'5m':'5','15m':'15','30m':'30','1H':'60','4H':'240','1D':'D','1W':'W','1M':'M'};
