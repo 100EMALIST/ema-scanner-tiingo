@@ -628,7 +628,7 @@ function buildCard(res){
   return `<div class="card" data-tags="${tags}" data-ticker="${ticker}">
     <!-- Row 1: Ticker full width label-bg -->
     <div style="display:flex;background:var(--label-bg);width:100%">
-      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="flex:1;max-width:100%">${ticker} <span style="font-size:.48rem;font-weight:400;${rvolStyle};white-space:nowrap">${rvolDisplay}</span></div>
+      <div class="tick-name ${dailyBull?'bull':'bear'}" onclick="openTV('${ticker}')" style="flex:1">${ticker}</div><span style="font-size:.52rem;font-weight:400;${rvolStyle};white-space:nowrap;padding:0 8px;align-self:center">${rvolDisplay}</span>
     </div>
     <!-- Row 2: Price + star + TF labels -->
     <div style="display:flex">
