@@ -5,10 +5,8 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
 
-  // Use Tiingo for VIX — ticker is VIX on Tiingo
-  const today = new Date().toISOString().split('T')[0];
-  const week  = new Date(Date.now()-7*864e5).toISOString().split('T')[0];
-  const url   = `https://api.tiingo.com/tiingo/daily/VIX/prices?startDate=${week}&token=${TOKEN}`;
+  // Tiingo IEX endpoint — live last price
+  const url = `https://api.tiingo.com/iex/VIX?token=${TOKEN}`;
 
   try {
     const data = await new Promise((resolve, reject) => {
@@ -24,15 +22,13 @@ module.exports = async (req, res) => {
       r.on('timeout', () => { r.destroy(); reject(new Error('Timeout')); });
     });
 
-    if (!Array.isArray(data) || data.length === 0) {
-      return res.status(502).json({ error: 'No VIX data' });
-    }
-
-    const latest = data[data.length - 1];
-    const vix = latest.close || latest.adjClose;
+    // IEX returns array
+    const quote = Array.isArray(data) ? data[0] : data;
+    const vix = quote?.last || quote?.close || quote?.tngoLast;
+    if (!vix) return res.status(502).json({ error: 'No price', raw: JSON.stringify(data).slice(0,100) });
 
     res.setHeader('Cache-Control', 'public, max-age=60');
-    return res.status(200).json({ vix: Math.round(vix * 100) / 100, date: latest.date });
+    return res.status(200).json({ vix: Math.round(vix * 100) / 100 });
   } catch(e) {
     return res.status(502).json({ error: e.message });
   }
