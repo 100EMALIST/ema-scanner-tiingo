@@ -464,9 +464,10 @@ const pct = v => Math.round(v*100)/100;
 
 function c200Close(t){
   if(!t||t.ab200==null)return nd();
-  const bg = t.ab200 ? 'var(--near-g)' : 'var(--near-r)';
+  const bg  = t.ab200 ? 'var(--near-g)' : 'var(--near-r)';
   const dir = t.ab200 ? '▲' : '▼';
-  return `<span style="background:${bg};padding:1px 4px;border-radius:2px;color:#fff">${dir} ${pct(t.pct200??0)}%</span>`;
+  const col = t.ab200 ? '#fff' : 'rgba(255,255,255,0.35)';
+  return `<span style="background:${bg};padding:1px 4px;border-radius:2px;color:${col}">${dir} ${pct(t.pct200??0)}%</span>`;
 }
 
 function c200High(t, tfLabel){
@@ -555,7 +556,7 @@ function cVWAP(t){
 }
 
 
-const HTF_LABEL_MAP = {'30m':'1H','1H':'4H','4H':'1D','1D':'1W','1W':'1M','1M':'–'};
+const HTF_LABEL_MAP = {'30m':'1H','1H':'4H','4H':'1D','1D':'1W','1W':'1M','1M':'1/4'};
 
 function cHTFBand(t, tfLabel){
   if(tfLabel==='5m'||tfLabel==='15m') return nd();
@@ -679,13 +680,7 @@ const TV_TF = {'5m':'5','15m':'15','30m':'30','1H':'60','4H':'240','1D':'D','1W'
 function openTV(t, tf){
   const interval = tf ? (TV_TF[tf]||'D') : 'D';
   const sym = encodeURIComponent(t);
-  const app = `tradingview://chart?symbol=${sym}&interval=${interval}`;
-  const web = `https://www.tradingview.com/chart/?symbol=${sym}&interval=${interval}`;
-  const a = document.createElement('a');
-  a.href = app; a.style.display='none';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>{ window.open(web,'_blank'); }, 500);
+  window.open(`https://www.tradingview.com/chart/?symbol=${sym}&interval=${interval}`,'_blank');
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
