@@ -146,7 +146,7 @@
   <button class="fbtn" onclick="setF(this,'HIGH_VOL')">HIGH VOL</button>
   <button class="fbtn" onclick="setF(this,'NEAR')">NEAR 200</button>
   <span style="color:rgba(255,255,255,0.2);margin:0 2px">|</span>
-  <button class="fbtn" onclick="setF(this,'WL')" style="color:#00BFFF;border-color:#00BFFF"><span style="font-size:1rem;vertical-align:middle">★</span> WATCHLIST</button>
+  <button class="fbtn" onclick="setF(this,'WL')" style="color:#FF00FF;border-color:#FF00FF;display:inline-flex;align-items:center;gap:4px"><span style="font-size:1.1rem;line-height:1">★</span>WATCHLIST</button>
   <button class="fbtn" onclick="setF(this,'COMM')" style="color:#FF9100;border-color:#FF9100">⬥ COMMODITIES</button>
 </div>
 
@@ -636,7 +636,7 @@ function buildCard(res){
     <div style="display:flex">
       <div style="min-width:90px;max-width:90px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px;justify-content:space-between">
         <span>${price?.toFixed(2)||'–'}</span>
-        <span id="wlb-${ticker}" onclick="toggleWL('${ticker}')" style="cursor:pointer;color:rgba(255,255,255,0.5);font-size:1.3rem;user-select:none;line-height:1" title="Add to Watchlist">☆</span>
+        <span id="wlb-${ticker}" onclick="toggleWL('${ticker}')" style="cursor:pointer;color:rgba(255,0,255,0.4);font-size:1.3rem;user-select:none;line-height:1" title="Add to Watchlist">☆</span>
       </div>
       <div style="width:4px;background:var(--label-bg)"></div>
       ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}" data-tfi="${i}" onclick="openTV('${ticker}','${TF_LABS[i]}')" style="cursor:pointer" onmouseover="this.style.filter='brightness(1.8)'" onmouseout="this.style.filter=''">${TF_LABS[i]}</div>`).join('')}
@@ -667,6 +667,17 @@ function setF(btn,f){
   });
   btn.classList.add('active');
   btn.classList.remove('inactive');
+  // COMM mode — 2 cards side by side, full focus
+  const grid = document.getElementById('grid');
+  if(f==='COMM'){
+    grid.style.gridTemplateColumns='repeat(2,1fr)';
+    grid.style.maxWidth='1300px';
+    grid.style.margin='0 auto';
+  } else {
+    grid.style.gridTemplateColumns='';
+    grid.style.maxWidth='';
+    grid.style.margin='';
+  }
   applyFilter();
 }
 function applyFilter(){
@@ -790,7 +801,7 @@ function toggleWL(ticker){
     if(btn){ btn.textContent='☆'; btn.style.color='rgba(255,255,255,0.4)'; }
   } else {
     masterWL.add(ticker);
-    if(btn){ btn.textContent='★'; btn.style.color='#ffffff'; }
+    if(btn){ btn.textContent='★'; btn.style.color='#FF00FF'; }
   }
   saveWL();
   const card = document.querySelector('.card[data-ticker="'+ticker+'"]');
@@ -805,7 +816,7 @@ function toggleWL(ticker){
 function applyWL(){
   masterWL.forEach(ticker=>{
     const btn = document.getElementById('wlb-'+ticker);
-    if(btn){ btn.textContent='★'; btn.style.color='#ffffff'; }
+    if(btn){ btn.textContent='★'; btn.style.color='#FF00FF'; }
   });
 }
 
