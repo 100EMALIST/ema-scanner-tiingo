@@ -98,6 +98,16 @@
 <div class="topbar">
   <div class="logo">EMA SCANNER</div>
   <button onclick="document.getElementById('info-modal').style.display='flex'" style="background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:8px">ℹ</button>
+  <input id="search" type="text" placeholder="SEARCH TICKER" oninput="searchFilter(this.value)"
+    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:3px;padding:3px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;width:150px;outline:none;text-transform:uppercase;letter-spacing:.05em;margin-left:auto"
+    onfocus="this.style.borderColor='rgba(255,255,255,0.4)'"
+    onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
+  />
+  <input id="search" type="text" placeholder="SEARCH TICKER" oninput="searchFilter(this.value)"
+    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);border-radius:3px;padding:3px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;width:150px;outline:none;text-transform:uppercase;letter-spacing:.04em;margin-left:auto"
+    onfocus="this.style.borderColor='rgba(255,255,255,0.5)'"
+    onblur="this.style.borderColor='rgba(255,255,255,0.2)'"
+  />
   <div class="topinfo">
     <span><span class="dot" id="dot"></span><span id="stat">Initialising...</span></span>
     <span id="lupd"></span>
@@ -105,29 +115,10 @@
     <span id="cnt"></span>
   </div>
 </div>
-<div style="padding:6px 14px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
-  <input id="search" type="text" placeholder="SEARCH TICKER" oninput="searchFilter(this.value)"
-    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:3px;padding:4px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.65rem;width:180px;outline:none;text-transform:uppercase;letter-spacing:.05em"
-    onfocus="this.style.borderColor='rgba(255,255,255,0.4)'"
-    onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
-  />
-  <span style="font-size:.55rem;color:var(--dim)" id="search-count"></span>
-</div>
 <div class="loading-bar" id="lb"></div>
 <div class="prog" id="prog"></div>
 
 
-    <div style="display:flex;gap:4px;flex-wrap:wrap" id="tf-toggles">
-      <button class="tbtn active" data-tf="5m" onclick="toggleTF(this,'5m')">5m</button>
-      <button class="tbtn active" data-tf="15m" onclick="toggleTF(this,'15m')">15m</button>
-      <button class="tbtn active" data-tf="30m" onclick="toggleTF(this,'30m')">30m</button>
-      <button class="tbtn active" data-tf="1H" onclick="toggleTF(this,'1H')">1H</button>
-      <button class="tbtn active" data-tf="4H" onclick="toggleTF(this,'4H')">4H</button>
-      <button class="tbtn active" data-tf="1D" onclick="toggleTF(this,'1D')">1D</button>
-      <button class="tbtn active" data-tf="1W" onclick="toggleTF(this,'1W')">1W</button>
-      <button class="tbtn active" data-tf="1M" onclick="toggleTF(this,'1M')">1M</button>
-    </div>
-  </div>
   <div>
     <div style="font-size:.55rem;color:rgba(255,255,255,0.4);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Rows</div>
     <div style="display:flex;gap:4px;flex-wrap:wrap" id="row-toggles">
@@ -142,17 +133,6 @@
       <button class="tbtn active" data-row="5 EMA CONTINUED" onclick="toggleRow(this,'5 EMA CONTINUED')">5 CONT</button>
     </div>
   </div>
-</div>
-<div style="display:flex;align-items:center;gap:5px;padding:5px 14px;background:#111;border-bottom:1px solid #2a2a2a;flex-wrap:wrap">
-  <span style="font-size:.55rem;color:rgba(255,255,255,0.35);margin-right:2px;text-transform:uppercase;letter-spacing:.05em">Columns:</span>
-  <button class="tbtn active" onclick="toggleTF(this,'5m')">5m</button>
-  <button class="tbtn active" onclick="toggleTF(this,'15m')">15m</button>
-  <button class="tbtn active" onclick="toggleTF(this,'30m')">30m</button>
-  <button class="tbtn active" onclick="toggleTF(this,'1H')">1H</button>
-  <button class="tbtn active" onclick="toggleTF(this,'4H')">4H</button>
-  <button class="tbtn active" onclick="toggleTF(this,'1D')">1D</button>
-  <button class="tbtn active" onclick="toggleTF(this,'1W')">1W</button>
-  <button class="tbtn active" onclick="toggleTF(this,'1M')">1M</button>
 </div>
 <div class="filters">
   <button class="fbtn active" onclick="setF(this,'ALL')">ALL</button>
