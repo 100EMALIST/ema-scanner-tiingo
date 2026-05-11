@@ -416,7 +416,7 @@ function computeTF(bs, dailyBull, price){
 // ── SCAN ─────────────────────────────────────────────────────────────────────
 async function scan(ticker){
   try{
-    const y1  = new Date(Date.now()-400*864e5).toISOString().split('T')[0];
+    const y1  = new Date(Date.now()-300*864e5).toISOString().split('T')[0];
     const y4  = new Date(Date.now()-4*365*864e5).toISOString().split('T')[0];
     const d30 = new Date(Date.now()-30*864e5).toISOString().split('T')[0];
 
@@ -749,8 +749,8 @@ async function runScan(){
   document.getElementById('dot').classList.add('live');
   document.getElementById('stat').textContent='Scanning...';
   let done=0;
-  for(let i=0;i<TICKERS.length;i+=15){
-    const batch=TICKERS.slice(i,i+15);
+  for(let i=0;i<TICKERS.length;i+=30){
+    const batch=TICKERS.slice(i,i+30);
     const res=await Promise.all(batch.map(scan));
     res.forEach((r,idx)=>{if(r)results[batch[idx]]=r;else failed.push(batch[idx]);done++});
     document.getElementById('prog').textContent=`${done}/${TICKERS.length} scanned · ${Object.keys(results).length} loaded`;
@@ -894,8 +894,8 @@ setInterval(fetchVIX, 300000); // refresh every 5 min
 // ── LIVE PRICE UPDATE ─────────────────────────────────────────────────────
 async function updateLivePrices(){
   const tickers = Object.keys(results);
-  for(let i=0; i<tickers.length; i+=20){
-    const batch = tickers.slice(i,i+20);
+  for(let i=0; i<tickers.length; i+=50){
+    const batch = tickers.slice(i,i+50);
     await Promise.all(batch.map(async ticker=>{
       try{
         const r = await fetch(`/api?ticker=${encodeURIComponent(ticker)}&endpoint=iex&interval=1Min&startDate=${new Date(Date.now()-1*864e5).toISOString().split('T')[0]}`);
@@ -920,7 +920,8 @@ async function updateLivePrices(){
 
 // Auto-scan on load, refresh every 5 min
 runScan();
-setInterval(()=>{ if(!scanning) runScan(); }, 300000);
+setInterval(()=>{ if(!scanning) runScan(); }, 120000);
+setInterval(()=>{ if(!scanning) updateLivePrices(); }, 30000);
 </script>
 
 <div id="info-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
