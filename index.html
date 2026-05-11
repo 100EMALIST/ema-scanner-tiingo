@@ -596,7 +596,7 @@ function buildCard(res){
 
   const cells = (fn, ...args) => T.map((t,i)=>{
     const sep = i===3?' swing-sep':i===6?' invest-sep':i===7?' invest-sep':'';
-    return `<div class="cell${sep}" data-tfi="${i}">${fn(t, TF_LABS[i], ...args)}</div>`;
+    return `<div class="cell${sep}" data-tfi="${i}" onclick="openTV('${ticker}','${TF_LABS[i]}')" style="cursor:pointer" onmouseover="this.style.filter='brightness(1.5)'" onmouseout="this.style.filter=''">${fn(t, TF_LABS[i], ...args)}</div>`;
   }).join('');
 
   const LABEL_COLORS = {
@@ -636,7 +636,7 @@ function buildCard(res){
         <span id="wlb-${ticker}" onclick="toggleWL('${ticker}')" style="cursor:pointer;color:rgba(255,255,255,0.5);font-size:1.3rem;user-select:none;line-height:1" title="Add to Watchlist">☆</span>
       </div>
       <div style="width:4px;background:var(--label-bg)"></div>
-      ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}" data-tfi="${i}">${TF_LABS[i]}</div>`).join('')}
+      ${TF_KEYS.map((_,i)=>`<div class="tick-tf ${TF_CLASS[i]}" data-tfi="${i}" onclick="openTV('${ticker}','${TF_LABS[i]}')" style="cursor:pointer" onmouseover="this.style.filter='brightness(1.8)'" onmouseout="this.style.filter=''">${TF_LABS[i]}</div>`).join('')}
     </div>
     ${row('200 EMA HIGH',   c200High)}
     ${row('200 EMA CLOSE',  c200Close)}
@@ -674,7 +674,19 @@ function applyFilter(){
     c.style.filter  = match ? '' : 'grayscale(0.8)';
   });
 }
-function openTV(t){window.open(`https://www.tradingview.com/chart/?symbol=${t}`,'_blank')}
+const TV_TF = {'5m':'5','15m':'15','30m':'30','1H':'60','4H':'240','1D':'D','1W':'W','1M':'M'};
+
+function openTV(t, tf){
+  const interval = tf ? (TV_TF[tf]||'D') : 'D';
+  const sym = encodeURIComponent(t);
+  const app = `tradingview://chart?symbol=${sym}&interval=${interval}`;
+  const web = `https://www.tradingview.com/chart/?symbol=${sym}&interval=${interval}`;
+  const a = document.createElement('a');
+  a.href = app; a.style.display='none';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>{ window.open(web,'_blank'); }, 500);
+}
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
 function renderAll(){
