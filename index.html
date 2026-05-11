@@ -870,22 +870,21 @@ function searchFilter(val){
 async function fetchVIX(){
   try{
     const r = await fetch('/api/vix');
-    const json = await r.json();
-    const vixVal = json.vix;
-    if(!vixVal||isNaN(vixVal)) return;
-    const el = document.getElementById('vix-val');
-    if(!el) return;
-    el.textContent = vixVal.toFixed(2);
-    // Colour: <15 calm green, 15-20 white, 20-30 amber, >30 red
-    el.style.color = vixVal < 15 ? '#00C853' : vixVal < 20 ? '#ffffff' : vixVal < 30 ? '#FF9100' : '#CC0000';
-    const cond = document.getElementById('vix-cond');
+    if(!r.ok) return;
+    const txt = await r.text();
+    let json; try{ json=JSON.parse(txt); }catch(e){ return; }
+    const v = json.vix;
+    if(!v||isNaN(v)) return;
+    const el=document.getElementById('vix-val');
+    const cond=document.getElementById('vix-cond');
+    if(el){ el.textContent=v.toFixed(2); el.style.color=v<15?'#00C853':v<20?'#fff':v<30?'#FF9100':'#CC0000'; }
     if(cond){
-      if(vixVal < 15){ cond.textContent='CALM'; cond.style.color='#00C853'; }
-      else if(vixVal < 20){ cond.textContent='NORMAL'; cond.style.color='rgba(255,255,255,0.5)'; }
-      else if(vixVal < 30){ cond.textContent='ELEVATED'; cond.style.color='#FF9100'; }
-      else { cond.textContent='EXTREME'; cond.style.color='#CC0000'; }
+      if(v<15){cond.textContent='CALM';cond.style.color='#00C853';}
+      else if(v<20){cond.textContent='NORMAL';cond.style.color='rgba(255,255,255,0.5)';}
+      else if(v<30){cond.textContent='ELEVATED';cond.style.color='#FF9100';}
+      else{cond.textContent='EXTREME';cond.style.color='#CC0000';}
     }
-  }catch(e){ console.log('VIX fetch failed',e); }
+  }catch(e){}
 }
 fetchVIX();
 setInterval(fetchVIX, 120000); // refresh every 5 min
