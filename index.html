@@ -871,21 +871,18 @@ async function fetchVIX(){
   try{
     const r = await fetch('/api/vix');
     const json = await r.json();
-    const rawVal = json.vxx || json.vix;
-    const close = rawVal;
-    if(!close||isNaN(close)) return;
+    const vixVal = json.vix;
+    if(!vixVal||isNaN(vixVal)) return;
     const el = document.getElementById('vix-val');
     if(!el) return;
-    const val = json.vxx || json.vix; // prefer live VXX, fallback to VIX close
-    const close = val;
-    el.textContent = close.toFixed(2) + (json.vxx ? '' : '*');
+    el.textContent = vixVal.toFixed(2);
     // Colour: <15 calm green, 15-20 white, 20-30 amber, >30 red
-    el.style.color = close < 15 ? '#00C853' : close < 20 ? '#ffffff' : close < 30 ? '#FF9100' : '#CC0000';
+    el.style.color = vixVal < 15 ? '#00C853' : vixVal < 20 ? '#ffffff' : vixVal < 30 ? '#FF9100' : '#CC0000';
     const cond = document.getElementById('vix-cond');
     if(cond){
-      if(close < 15){ cond.textContent='CALM'; cond.style.color='#00C853'; }
-      else if(close < 20){ cond.textContent='NORMAL'; cond.style.color='rgba(255,255,255,0.5)'; }
-      else if(close < 30){ cond.textContent='ELEVATED'; cond.style.color='#FF9100'; }
+      if(vixVal < 15){ cond.textContent='CALM'; cond.style.color='#00C853'; }
+      else if(vixVal < 20){ cond.textContent='NORMAL'; cond.style.color='rgba(255,255,255,0.5)'; }
+      else if(vixVal < 30){ cond.textContent='ELEVATED'; cond.style.color='#FF9100'; }
       else { cond.textContent='EXTREME'; cond.style.color='#CC0000'; }
     }
   }catch(e){ console.log('VIX fetch failed',e); }
