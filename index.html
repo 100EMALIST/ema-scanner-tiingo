@@ -146,7 +146,8 @@
   <button class="fbtn" onclick="setF(this,'HIGH_VOL')">HIGH VOL</button>
   <button class="fbtn" onclick="setF(this,'NEAR')">NEAR 200</button>
   <span style="color:rgba(255,255,255,0.2);margin:0 2px">|</span>
-  <button class="fbtn" onclick="setF(this,'WL')" style="color:#00BFFF;border-color:#00BFFF">★ WATCHLIST</button>
+  <button class="fbtn" onclick="setF(this,'WL')" style="color:#00BFFF;border-color:#00BFFF"><span style="font-size:1rem;vertical-align:middle">★</span> WATCHLIST</button>
+  <button class="fbtn" onclick="setF(this,'COMM')" style="color:#FF9100;border-color:#FF9100">⬥ COMMODITIES</button>
 </div>
 
 <div class="wrap">
@@ -453,6 +454,7 @@ async function scan(ticker){
     if(tfs.tf1d?.pct200!=null&&tfs.tf1d.pct200<=5)tags.push('NEAR');
     if(Object.values(tfs).some(t=>t?.rv!=null&&t.rv>=CFG.VOL_HIGH))tags.push('HIGH_VOL');
     if(masterWL.has(ticker))tags.push('WL');
+    if(['XAUUSD','XAGUSD'].includes(ticker))tags.push('COMM');
 
     return {ticker, price, dailyBull, rvol, rvolTxt, tfs, tags:tags.join(',')};
   }catch(e){console.error(ticker,e);return null}
