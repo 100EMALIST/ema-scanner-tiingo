@@ -12,17 +12,9 @@ module.exports = async (req, res) => {
   const s = (startDate || '2024-01-01').replace(/[^0-9\-]/g, '');
   const f = (interval || 'daily').replace(/[^a-z0-9]/g, '');
 
-  let url;
-  if (endpoint === 'iex-last') {
-    // Real-time last trade price
-    url = `https://api.tiingo.com/iex/${t}?token=${TOKEN}`;
-  } else if (endpoint === 'iex') {
-    // Intraday historical
-    url = `https://api.tiingo.com/iex/${t}/prices?startDate=${s}&resampleFreq=${f}&token=${TOKEN}`;
-  } else {
-    // Daily/weekly/monthly historical
-    url = `https://api.tiingo.com/tiingo/daily/${t}/prices?startDate=${s}&resampleFreq=${f}&token=${TOKEN}`;
-  }
+  const url = endpoint === 'iex'
+    ? `https://api.tiingo.com/iex/${t}/prices?startDate=${s}&resampleFreq=${f}&token=${TOKEN}`
+    : `https://api.tiingo.com/tiingo/daily/${t}/prices?startDate=${s}&resampleFreq=${f}&token=${TOKEN}`;
 
   try {
     const data = await new Promise((resolve, reject) => {
@@ -37,7 +29,7 @@ module.exports = async (req, res) => {
       r.on('error', reject);
       r.on('timeout', () => { r.destroy(); reject(new Error('Timeout')); });
     });
-    res.setHeader('Cache-Control', endpoint === 'iex-last' ? 'no-cache' : 'public, max-age=60');
+    res.setHeader('Cache-Control', 'public, max-age=60');
     return res.status(200).json(data);
   } catch(e) {
     return res.status(502).json({ error: e.message });
