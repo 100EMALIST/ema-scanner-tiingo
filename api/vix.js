@@ -1,36 +1,38 @@
 const https = require('https');
+const TOKEN = '4669bd81d63093e01dd88436069107820a0730ae';
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
 
-  // stooq symbol for VIX is vi.f
-  const url = 'https://stooq.com/q/l/?s=vi.f&f=sd2t2ohlcv&h&e=csv';
+  // Use Tiingo for VIX — ticker is VIX on Tiingo
+  const today = new Date().toISOString().split('T')[0];
+  const week  = new Date(Date.now()-7*864e5).toISOString().split('T')[0];
+  const url   = `https://api.tiingo.com/tiingo/daily/VIX/prices?startDate=${week}&token=${TOKEN}`;
 
   try {
     const data = await new Promise((resolve, reject) => {
       const r = https.get(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0' },
+        headers: { 'Authorization': `Token ${TOKEN}`, 'Content-Type': 'application/json' },
         timeout: 8000
       }, (response) => {
         let body = '';
         response.on('data', c => body += c);
-        response.on('end', () => resolve(body));
+        response.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { reject(e); } });
       });
       r.on('error', reject);
       r.on('timeout', () => { r.destroy(); reject(new Error('Timeout')); });
     });
 
-    const lines = data.trim().split('\n');
-    if (lines.length < 2) return res.status(502).json({ error: 'No data', raw: data.slice(0,100) });
+    if (!Array.isArray(data) || data.length === 0) {
+      return res.status(502).json({ error: 'No VIX data' });
+    }
 
-    const cols = lines[1].split(',');
-    // Columns: Symbol,Date,Time,Open,High,Low,Close,Volume
-    const close = parseFloat(cols[6]);
-    if (isNaN(close)) return res.status(502).json({ error: 'Parse error', raw: lines[1] });
+    const latest = data[data.length - 1];
+    const vix = latest.close || latest.adjClose;
 
-    res.setHeader('Cache-Control', 'public, max-age=300');
-    return res.status(200).json({ vix: close, date: cols[1] });
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    return res.status(200).json({ vix: Math.round(vix * 100) / 100, date: latest.date });
   } catch(e) {
     return res.status(502).json({ error: e.message });
   }
