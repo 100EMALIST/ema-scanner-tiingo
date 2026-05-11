@@ -29,7 +29,7 @@
   .filters{display:flex;gap:5px;padding:6px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
   .fbtn{padding:3px 9px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);font-family:'JetBrains Mono',monospace;font-size:.6rem;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.05em}
   .fbtn:hover{border-color:var(--green);color:var(--green)}
-  .fbtn.active{background:var(--green);border-color:var(--green);color:#000;font-weight:700}
+  .fbtn.active{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.5);color:#fff;font-weight:700}
   .fbtn.inactive{opacity:0.35}
   .wrap{padding:10px 14px;overflow-x:auto}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(600px,1fr));gap:6px}
@@ -276,7 +276,8 @@ const TICKERS = [
   'XAUUSD',
   'BTCUSD',
   'ETHUSD',
-  'MARA'
+  'MARA',
+  'BMNR'
 ];
 
 const CFG = {
@@ -457,7 +458,7 @@ async function scan(ticker){
     if(Object.values(tfs).some(t=>t?.rv!=null&&t.rv>=CFG.VOL_HIGH))tags.push('HIGH_VOL');
     if(masterWL.has(ticker))tags.push('WL');
     if(['XAUUSD','XAGUSD'].includes(ticker))tags.push('COMM');
-    if(['MSTR','MARA','ETHUSD','BTCUSD'].includes(ticker))tags.push('CRYPTO');
+    if(['MSTR','BMNR','ETHUSD','BTCUSD'].includes(ticker))tags.push('CRYPTO');
 
     return {ticker, price, dailyBull, rvol, rvolTxt, tfs, tags:tags.join(',')};
   }catch(e){console.error(ticker,e);return null}
@@ -663,13 +664,19 @@ function buildCard(res){
 
 // ── FILTER ────────────────────────────────────────────────────────────────────
 function setF(btn,f){
+  // Toggle — click active tab again = go back to ALL
+  if(curFilter===f){
+    f='ALL';
+    document.querySelectorAll('.fbtn').forEach(b=>{b.classList.remove('active');b.classList.add('inactive');});
+    document.querySelector('.fbtn').classList.add('active');
+    document.querySelector('.fbtn').classList.remove('inactive');
+  } else {
+    curFilter=f;
+    document.querySelectorAll('.fbtn').forEach(b=>{b.classList.remove('active');b.classList.add('inactive');});
+    btn.classList.add('active');
+    btn.classList.remove('inactive');
+  }
   curFilter=f;
-  document.querySelectorAll('.fbtn').forEach(b=>{
-    b.classList.remove('active');
-    b.classList.add('inactive');
-  });
-  btn.classList.add('active');
-  btn.classList.remove('inactive');
   // COMM mode — 2 cards side by side, full focus
   const grid = document.getElementById('grid');
   if(f==='COMM'||f==='CRYPTO'||f==='WL'){
