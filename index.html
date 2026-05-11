@@ -868,7 +868,7 @@ function searchFilter(val){
 // ── VIX fetch ─────────────────────────────────────────────────────────────
 async function fetchVIX(){
   try{
-    const r = await fetch('/api/vix', {signal:AbortSignal.timeout(8000)});
+    const r = await fetch('/api/vix');
     const json = await r.json();
     const close = json.vix;
     if(!close||isNaN(close)) return;
