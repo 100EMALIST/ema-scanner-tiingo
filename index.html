@@ -680,7 +680,13 @@ const TV_TF = {'5m':'5','15m':'15','30m':'30','1H':'60','4H':'240','1D':'D','1W'
 function openTV(t, tf){
   const interval = tf ? (TV_TF[tf]||'D') : 'D';
   const sym = encodeURIComponent(t);
-  window.open(`https://www.tradingview.com/chart/?symbol=${sym}&interval=${interval}`,'_blank');
+  // Use location.href to trigger URI scheme — allows desktop app to intercept
+  const a = document.createElement('a');
+  a.href = `tradingview://chart?symbol=${sym}&interval=${interval}`;
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
