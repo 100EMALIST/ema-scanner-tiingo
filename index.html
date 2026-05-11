@@ -642,7 +642,7 @@ function buildCard(res){
     <!-- Row 2: Price + star + TF labels -->
     <div style="display:flex">
       <div style="min-width:90px;max-width:90px;background:var(--label-bg);padding:3px 8px;font-size:.68rem;color:${priceColor};display:flex;align-items:center;gap:5px;justify-content:space-between">
-        <span>${price?.toFixed(2)||'–'}</span>
+        <span class='price-cell-val'>${price?.toFixed(2)||'–'}</span>
         <span id="wlb-${ticker}" onclick="toggleWL('${ticker}')" style="cursor:pointer;color:rgba(255,0,255,0.4);font-size:1.3rem;user-select:none;line-height:1" title="Add to Watchlist">☆</span>
       </div>
       <div style="width:4px;background:var(--label-bg)"></div>
@@ -762,6 +762,7 @@ async function runScan(){
   document.getElementById('stat').textContent='Live';
   document.getElementById('lupd').textContent='Updated '+new Date().toLocaleTimeString();
   document.getElementById('prog').textContent='';
+  updateLivePrices();
 }
 
 
@@ -888,6 +889,34 @@ async function fetchVIX(){
 }
 fetchVIX();
 setInterval(fetchVIX, 300000); // refresh every 5 min
+
+
+// ── LIVE PRICE UPDATE ─────────────────────────────────────────────────────
+async function updateLivePrices(){
+  const tickers = Object.keys(results);
+  for(let i=0; i<tickers.length; i+=20){
+    const batch = tickers.slice(i,i+20);
+    await Promise.all(batch.map(async ticker=>{
+      try{
+        const r = await fetch(`/api?ticker=${encodeURIComponent(ticker)}&endpoint=iex&interval=1min&startDate=${new Date(Date.now()-2*864e5).toISOString().split('T')[0]}`);
+        if(!r.ok) return;
+        const d = await r.json();
+        if(!Array.isArray(d)||d.length===0) return;
+        const last = d[d.length-1];
+        const livePrice = last.close || last.last;
+        if(!livePrice||isNaN(livePrice)) return;
+        // Update stored result
+        if(results[ticker]) results[ticker].price = livePrice;
+        // Update price cell directly
+        const card = document.querySelector(`.card[data-ticker="${ticker}"]`);
+        if(card){
+          const priceEl = card.querySelector('.price-cell-val');
+          if(priceEl) priceEl.textContent = livePrice.toFixed(2);
+        }
+      }catch(e){}
+    }));
+  }
+}
 
 // Auto-scan on load, refresh every 5 min
 runScan();
