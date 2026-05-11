@@ -105,6 +105,14 @@
     <span id="cnt"></span>
   </div>
 </div>
+<div style="padding:6px 14px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+  <input id="search" type="text" placeholder="SEARCH TICKER" oninput="searchFilter(this.value)"
+    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:3px;padding:4px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.65rem;width:180px;outline:none;text-transform:uppercase;letter-spacing:.05em"
+    onfocus="this.style.borderColor='rgba(255,255,255,0.4)'"
+    onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
+  />
+  <span style="font-size:.55rem;color:var(--dim)" id="search-count"></span>
+</div>
 <div class="loading-bar" id="lb"></div>
 <div class="prog" id="prog"></div>
 
@@ -818,6 +826,19 @@ function applyColVisibility(){
       el.classList.toggle('col-hidden', hiddenTFs.has(label));
     });
   });
+}
+
+
+function searchFilter(val){
+  const q = val.trim().toUpperCase();
+  let count = 0;
+  document.querySelectorAll('.card').forEach(c=>{
+    const ticker = c.getAttribute('data-ticker')||'';
+    const match = !q || ticker.includes(q);
+    c.style.display = match ? '' : 'none';
+    if(match) count++;
+  });
+  document.getElementById('search-count').textContent = q ? count+' found' : '';
 }
 
 // Auto-scan on load, refresh every 5 min
