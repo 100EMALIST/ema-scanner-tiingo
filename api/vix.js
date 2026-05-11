@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
 
   const week = new Date(Date.now()-7*864e5).toISOString().split('T')[0];
-  const url  = `https://api.tiingo.com/tiingo/daily/VIX/prices?startDate=${week}&token=${TOKEN}`;
+  const url  = `https://api.tiingo.com/tiingo/daily/VIXY/prices?startDate=${week}&token=${TOKEN}`;
 
   try {
     const data = await new Promise((resolve, reject) => {
