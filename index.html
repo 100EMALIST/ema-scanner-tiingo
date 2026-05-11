@@ -871,11 +871,14 @@ async function fetchVIX(){
   try{
     const r = await fetch('/api/vix');
     const json = await r.json();
-    const close = json.vix;
+    const rawVal = json.vxx || json.vix;
+    const close = rawVal;
     if(!close||isNaN(close)) return;
     const el = document.getElementById('vix-val');
     if(!el) return;
-    el.textContent = close.toFixed(2);
+    const val = json.vxx || json.vix; // prefer live VXX, fallback to VIX close
+    const close = val;
+    el.textContent = close.toFixed(2) + (json.vxx ? '' : '*');
     // Colour: <15 calm green, 15-20 white, 20-30 amber, >30 red
     el.style.color = close < 15 ? '#00C853' : close < 20 ? '#ffffff' : close < 30 ? '#FF9100' : '#CC0000';
     const cond = document.getElementById('vix-cond');
@@ -888,7 +891,7 @@ async function fetchVIX(){
   }catch(e){ console.log('VIX fetch failed',e); }
 }
 fetchVIX();
-setInterval(fetchVIX, 300000); // refresh every 5 min
+setInterval(fetchVIX, 120000); // refresh every 5 min
 
 
 // ── LIVE PRICE UPDATE ─────────────────────────────────────────────────────
