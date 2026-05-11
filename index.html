@@ -119,19 +119,29 @@
 <div class="prog" id="prog"></div>
 
 
-  <div>
-    <div style="font-size:.55rem;color:rgba(255,255,255,0.4);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Rows</div>
-    <div style="display:flex;gap:4px;flex-wrap:wrap" id="row-toggles">
-      <button class="tbtn active" data-row="200 EMA HIGH" onclick="toggleRow(this,'200 EMA HIGH')">200 HIGH</button>
-      <button class="tbtn active" data-row="200 EMA CLOSE" onclick="toggleRow(this,'200 EMA CLOSE')">200 CLOSE</button>
-      <button class="tbtn active" data-row="200 EMA LOW" onclick="toggleRow(this,'200 EMA LOW')">200 LOW</button>
-      <button class="tbtn active" data-row="100 EMA H/L" onclick="toggleRow(this,'100 EMA H/L')">100 BAND</button>
-      <button class="tbtn active" data-row="5 EMA LOW %" onclick="toggleRow(this,'5 EMA LOW %')">5 LOW%</button>
-      <button class="tbtn active" data-row="5 EMA HTF BAND" onclick="toggleRow(this,'5 EMA HTF BAND')">5 HTF</button>
-      <button class="tbtn active" data-row="VOLUME" onclick="toggleRow(this,'VOLUME')">VOLUME</button>
-      <button class="tbtn active" data-row="200 EMA SUPPORT" onclick="toggleRow(this,'200 EMA SUPPORT')">SUPPORT</button>
-      <button class="tbtn active" data-row="5 EMA CONTINUED" onclick="toggleRow(this,'5 EMA CONTINUED')">5 CONT</button>
-    </div>
+<div style="display:flex;align-items:center;gap:10px;padding:5px 14px;background:#111;border-bottom:1px solid #2a2a2a;flex-wrap:wrap">
+  <span style="font-size:.58rem;color:#fff;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em">ROW TOGGLE ON/OFF</span>
+  <div style="display:flex;gap:3px;flex-wrap:wrap">
+    <button class="tbtn active" onclick="toggleRow(this,'200 EMA HIGH')">200 HIGH</button>
+    <button class="tbtn active" onclick="toggleRow(this,'200 EMA CLOSE')">200 CLOSE</button>
+    <button class="tbtn active" onclick="toggleRow(this,'200 EMA LOW')">200 LOW</button>
+    <button class="tbtn active" onclick="toggleRow(this,'100 EMA H/L')">100 BAND</button>
+    <button class="tbtn active" onclick="toggleRow(this,'5 EMA LOW %')">5 LOW%</button>
+    <button class="tbtn active" onclick="toggleRow(this,'5 EMA HTF BAND')">5 HTF</button>
+    <button class="tbtn active" onclick="toggleRow(this,'VOLUME')">VOLUME</button>
+    <button class="tbtn active" onclick="toggleRow(this,'200 EMA SUPPORT')">SUPPORT</button>
+    <button class="tbtn active" onclick="toggleRow(this,'5 EMA CONTINUED')">5 CONT</button>
+  </div>
+  <span style="font-size:.58rem;color:#fff;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;margin-left:8px">TIMEFRAME TOGGLE ON/OFF</span>
+  <div style="display:flex;gap:3px;flex-wrap:wrap">
+    <button class="tbtn active" onclick="toggleTF(this,'5m')">5m</button>
+    <button class="tbtn active" onclick="toggleTF(this,'15m')">15m</button>
+    <button class="tbtn active" onclick="toggleTF(this,'30m')">30m</button>
+    <button class="tbtn active" onclick="toggleTF(this,'1H')">1H</button>
+    <button class="tbtn active" onclick="toggleTF(this,'4H')">4H</button>
+    <button class="tbtn active" onclick="toggleTF(this,'1D')">1D</button>
+    <button class="tbtn active" onclick="toggleTF(this,'1W')">1W</button>
+    <button class="tbtn active" onclick="toggleTF(this,'1M')">1M</button>
   </div>
 </div>
 <div class="filters">
