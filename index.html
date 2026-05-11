@@ -146,6 +146,7 @@
   <button class="fbtn" onclick="setF(this,'WATCH')">WATCH</button>
   <button class="fbtn" onclick="setF(this,'HIGH_VOL')">HIGH VOL</button>
   <button class="fbtn" onclick="setF(this,'NEAR')">NEAR 200</button>
+  <button class="fbtn" onclick="setF(this,'5EMA30')">5 EMA 30m ▲</button>
   <span style="color:rgba(255,255,255,0.2);margin:0 2px">|</span>
   <button class="fbtn" onclick="setF(this,'WL')" style="color:#FF00FF;border-color:#FF00FF">WATCHLIST</button>
   <button class="fbtn" onclick="setF(this,'COMM')" style="color:#FF9100;border-color:#FF9100">⬥ COMMODITIES</button>
@@ -458,6 +459,7 @@ async function scan(ticker){
     if(tfs.tf1d?.pct200!=null&&tfs.tf1d.pct200<=5)tags.push('NEAR');
     if(Object.values(tfs).some(t=>t?.rv!=null&&t.rv>=CFG.VOL_HIGH))tags.push('HIGH_VOL');
     if(masterWL.has(ticker))tags.push('WL');
+    if(tfs.tf30m?.ab5l===true)tags.push('5EMA30');
     if(['XAUUSD','XAGUSD'].includes(ticker))tags.push('COMM');
     if(['MSTR','BMNR','ETHUSD','BTCUSD'].includes(ticker))tags.push('CRYPTO');
 
@@ -692,7 +694,7 @@ function setF(btn,f){
   applyFilter();
 }
 function applyFilter(){
-  const exclusive = ['COMM','CRYPTO','WL'];
+  const exclusive = ['COMM','CRYPTO','WL','5EMA30'];
   document.querySelectorAll('.card').forEach(c=>{
     const tags=c.getAttribute('data-tags')||'ALL';
     const match = curFilter==='ALL'||tags.includes(curFilter);
