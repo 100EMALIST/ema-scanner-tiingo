@@ -97,22 +97,19 @@
 
 <div class="topbar">
   <div class="logo">EMA SCANNER</div>
-  <button onclick="document.getElementById('info-modal').style.display='flex'" style="background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:8px">ℹ</button>
-  <input id="search" type="text" placeholder="SEARCH TICKER" oninput="searchFilter(this.value)"
-    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:3px;padding:3px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;width:150px;outline:none;text-transform:uppercase;letter-spacing:.05em;margin-left:auto"
-    onfocus="this.style.borderColor='rgba(255,255,255,0.4)'"
-    onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
-  />
-  <input id="search" type="text" placeholder="SEARCH TICKER" oninput="searchFilter(this.value)"
-    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);border-radius:3px;padding:3px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;width:150px;outline:none;text-transform:uppercase;letter-spacing:.04em;margin-left:auto"
-    onfocus="this.style.borderColor='rgba(255,255,255,0.5)'"
-    onblur="this.style.borderColor='rgba(255,255,255,0.2)'"
-  />
   <div class="topinfo">
     <span><span class="dot" id="dot"></span><span id="stat">Initialising...</span></span>
     <span id="lupd"></span>
     <span>Next: <span id="nxt" style="color:#00BFFF;font-weight:700">--</span></span>
     <span id="cnt"></span>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+    <input id="search" type="text" placeholder="SEARCH TICKER" oninput="searchFilter(this.value)"
+      style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);border-radius:3px;padding:3px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;width:150px;outline:none;text-transform:uppercase;letter-spacing:.04em"
+      onfocus="this.style.borderColor='rgba(255,255,255,0.5)'"
+      onblur="this.style.borderColor='rgba(255,255,255,0.2)'"
+    />
+    <button onclick="document.getElementById('info-modal').style.display='flex'" style="background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">ℹ</button>
   </div>
 </div>
 <div class="loading-bar" id="lb"></div>
@@ -842,21 +839,21 @@ setInterval(()=>{ if(!scanning) runScan(); }, 300000);
       <span style="font-family:Syne,sans-serif;font-size:1rem;font-weight:800;color:#00C853">HOW TO USE EMA SCANNER</span>
       <button onclick="document.getElementById('info-modal').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer">✕</button>
     </div>
-    <p style="color:#FFD700;font-weight:700;margin-bottom:8px">200 EMA SYSTEM</p>
-    <p><span style="color:#FFD700">200 EMA CLOSE</span> — Green background = price above 200 EMA (bullish). Red = below (bearish). This is your primary trend filter.</p>
-    <p style="margin-top:6px"><span style="color:#FFD700">200 EMA HIGH</span> — APR = price approaching the top of the 200 EMA band. IN = inside the band. 🫣 = fallen below close.</p>
-    <p style="margin-top:6px"><span style="color:#FFD700">200 EMA LOW</span> — Shows % above the low when between close and low. 🚫 = price has broken below the 200 EMA low — no entry.</p>
-    <p style="color:#FF6600;font-weight:700;margin:10px 0 6px">100 EMA H/L BAND</p>
-    <p>APR = approaching from above within 2%. ▲ % LOW = inside band, showing how far above the low support you are.</p>
-    <p style="color:#00BFFF;font-weight:700;margin:10px 0 6px">5 EMA LOW %</p>
-    <p>Green background = price above the 5 EMA Low — potential entry zone. 🚫 = below the 5 EMA Low — wait.</p>
-    <p style="color:#00C853;font-weight:700;margin:10px 0 6px">200 EMA SUPPORT / 5 EMA CONT</p>
-    <p><span style="color:#00C853">SUPPORT</span> = EMA holding, conditions met for entry. <span style="color:#FFD700">WATCH</span> = approaching key level, prepare.</p>
-    <p style="color:#FFD700;font-weight:700;margin:10px 0 6px">⚙ USING THE SCANNER</p>
-    <p>Click <strong style="color:#fff">⚙ COLUMNS</strong> to toggle any row or timeframe on/off. Changes apply instantly across all cards.</p>
-    <p style="margin-top:6px">Click <strong style="color:#fff">★ FV / YA / HG</strong> on any card to add it to your watchlist. Click the same button in the filter bar to show only that watchlist.</p>
-    <p style="margin-top:6px">Click any <strong style="color:#fff">ticker name</strong> to open it directly in TradingView.</p>
-    <p style="color:rgba(255,255,255,0.4);margin-top:14px;font-size:.58rem">Data: Tiingo · Auto-refreshes every 5 minutes · 5 EMA trigger = within 5% · Not financial advice</p>
+    <p style="color:#FFD700;font-weight:700;margin-bottom:6px">READING THE CARDS</p>
+    <p><span style="color:#FFD700">200 EMA CLOSE</span> — Green bg = above 200 EMA (bull). Red = below (bear). Primary trend filter.</p>
+    <p style="margin-top:5px"><span style="color:#FFD700">200 EMA HIGH</span> — APR = approaching top of band. IN = inside band. Dark red cell = fallen through.</p>
+    <p style="margin-top:5px"><span style="color:#FFD700">200 EMA LOW</span> — Active between close and low. Shows % above last support. Dark red = broken.</p>
+    <p style="margin-top:5px"><span style="color:#FF6600">100 EMA H/L</span> — APR ▼ = approaching within 2%. ▲ % LOW = inside band, % from low support.</p>
+    <p style="margin-top:5px"><span style="color:#00BFFF">5 EMA LOW %</span> — Green bg = above 5 EMA Low (entry zone). Dark red = below, no entry.</p>
+    <p style="margin-top:5px"><span style="color:#00BFFF">5 EMA HTF BAND</span> — Next higher TF 5 EMA zone. Green = near low (best entry). Yellow = approaching. Dark red = broken.</p>
+    <p style="margin-top:5px"><span style="color:rgba(255,255,255,0.7)">VOLUME</span> — HIGH = institutions active. AVERAGE = normal. LOW = quiet.</p>
+    <p style="margin-top:5px"><span style="color:#00C853">200 EMA SUPPORT / 5 EMA CONTINUED</span> — SUPPORT = conditions met. WATCH = approaching key level.</p>
+    <p style="color:#FFD700;font-weight:700;margin:12px 0 5px">USING THE SCANNER</p>
+    <p>Use <strong style="color:#fff">ROW TOGGLE ON/OFF</strong> and <strong style="color:#fff">TIMEFRAME TOGGLE ON/OFF</strong> to show/hide rows or columns.</p>
+    <p style="margin-top:5px">Use <strong style="color:#fff">BULL / BEAR / SUPPORT</strong> filters to narrow down cards.</p>
+    <p style="margin-top:5px">Click <strong style="color:#fff">☆ star</strong> on any card to add to master watchlist. Filter by <strong style="color:#00BFFF">★ WATCHLIST</strong> to view only starred stocks.</p>
+    <p style="margin-top:5px">Click any <strong style="color:#fff">ticker name</strong> to open directly in TradingView.</p>
+    <p style="color:rgba(255,255,255,0.35);margin-top:14px;font-size:.55rem">Data: Tiingo · Auto-refreshes every 5 min · Not financial advice</p>
   </div>
 </div>
 </body>
