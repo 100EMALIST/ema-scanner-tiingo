@@ -866,14 +866,10 @@ function searchFilter(val){
 // ── VIX fetch ─────────────────────────────────────────────────────────────
 async function fetchVIX(){
   try{
-    // Use stooq.com free endpoint — no auth, returns CSV
-    const r = await fetch('https://stooq.com/q/l/?s=%5Evix&f=sd2t2ohlcv&h&e=csv', {signal:AbortSignal.timeout(8000)});
-    const txt = await r.text();
-    const lines = txt.trim().split('\n');
-    if(lines.length < 2) return;
-    const cols = lines[1].split(',');
-    const close = parseFloat(cols[6]); // Close column
-    if(isNaN(close)) return;
+    const r = await fetch('/api/vix', {signal:AbortSignal.timeout(8000)});
+    const json = await r.json();
+    const close = json.vix;
+    if(!close||isNaN(close)) return;
     const el = document.getElementById('vix-val');
     if(!el) return;
     el.textContent = close.toFixed(2);
