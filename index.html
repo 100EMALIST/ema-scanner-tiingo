@@ -907,25 +907,21 @@ setInterval(fetchVIX, 120000); // refresh every 5 min
 // ── LIVE PRICE UPDATE ─────────────────────────────────────────────────────
 async function updateLivePrices(){
   const tickers = Object.keys(results);
+  const today = new Date().toISOString().split('T')[0];
   for(let i=0; i<tickers.length; i+=50){
     const batch = tickers.slice(i,i+50);
     await Promise.all(batch.map(async ticker=>{
       try{
-        const r = await fetch(`/api?ticker=${encodeURIComponent(ticker)}&endpoint=iex&interval=1Min&startDate=${new Date(Date.now()-1*864e5).toISOString().split('T')[0]}`);
+        const r = await fetch(`/api?ticker=${encodeURIComponent(ticker)}&interval=daily&startDate=${today}`);
         if(!r.ok) return;
         const d = await r.json();
         if(!Array.isArray(d)||d.length===0) return;
-        const last = d[d.length-1];
-        const livePrice = last.close || last.last;
+        const livePrice = d[d.length-1].close;
         if(!livePrice||isNaN(livePrice)) return;
-        // Update stored result
         if(results[ticker]) results[ticker].price = livePrice;
-        // Update price cell directly
         document.querySelectorAll(`.card[data-ticker="${ticker}"] .price-cell-val`).forEach(el=>{
           el.textContent = livePrice.toFixed(2);
         });
-        // Also update stored result for next render
-        if(results[ticker]) results[ticker].price = livePrice;
       }catch(e){}
     }));
   }
