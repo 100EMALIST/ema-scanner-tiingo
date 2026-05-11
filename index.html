@@ -100,6 +100,7 @@
     <span id="cnt"></span>
   </div>
   <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+    <span style="font-size:.6rem;color:rgba(255,255,255,0.5);white-space:nowrap">VIX: <span id="vix-val" style="font-weight:700">--</span> <span id="vix-cond" style="font-size:.55rem;font-weight:400"></span></span>
     <input id="search" type="text" placeholder="SEARCH TICKER" oninput="searchFilter(this.value)"
       style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);border-radius:3px;padding:3px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;width:150px;outline:none;text-transform:uppercase;letter-spacing:.04em"
       onfocus="this.style.borderColor='rgba(255,255,255,0.5)'"
@@ -860,6 +861,35 @@ function searchFilter(val){
   });
   document.getElementById('search-count').textContent = q ? count+' found' : '';
 }
+
+
+// ── VIX fetch ─────────────────────────────────────────────────────────────
+async function fetchVIX(){
+  try{
+    // Use stooq.com free endpoint — no auth, returns CSV
+    const r = await fetch('https://stooq.com/q/l/?s=%5Evix&f=sd2t2ohlcv&h&e=csv', {signal:AbortSignal.timeout(8000)});
+    const txt = await r.text();
+    const lines = txt.trim().split('\n');
+    if(lines.length < 2) return;
+    const cols = lines[1].split(',');
+    const close = parseFloat(cols[6]); // Close column
+    if(isNaN(close)) return;
+    const el = document.getElementById('vix-val');
+    if(!el) return;
+    el.textContent = close.toFixed(2);
+    // Colour: <15 calm green, 15-20 white, 20-30 amber, >30 red
+    el.style.color = close < 15 ? '#00C853' : close < 20 ? '#ffffff' : close < 30 ? '#FF9100' : '#CC0000';
+    const cond = document.getElementById('vix-cond');
+    if(cond){
+      if(close < 15){ cond.textContent='CALM'; cond.style.color='#00C853'; }
+      else if(close < 20){ cond.textContent='NORMAL'; cond.style.color='rgba(255,255,255,0.5)'; }
+      else if(close < 30){ cond.textContent='ELEVATED'; cond.style.color='#FF9100'; }
+      else { cond.textContent='EXTREME'; cond.style.color='#CC0000'; }
+    }
+  }catch(e){ console.log('VIX fetch failed',e); }
+}
+fetchVIX();
+setInterval(fetchVIX, 300000); // refresh every 5 min
 
 // Auto-scan on load, refresh every 5 min
 runScan();
