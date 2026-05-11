@@ -898,7 +898,7 @@ async function updateLivePrices(){
     const batch = tickers.slice(i,i+20);
     await Promise.all(batch.map(async ticker=>{
       try{
-        const r = await fetch(`/api?ticker=${encodeURIComponent(ticker)}&endpoint=iex&interval=1min&startDate=${new Date(Date.now()-2*864e5).toISOString().split('T')[0]}`);
+        const r = await fetch(`/api?ticker=${encodeURIComponent(ticker)}&endpoint=iex&interval=1Min&startDate=${new Date(Date.now()-1*864e5).toISOString().split('T')[0]}`);
         if(!r.ok) return;
         const d = await r.json();
         if(!Array.isArray(d)||d.length===0) return;
@@ -908,11 +908,11 @@ async function updateLivePrices(){
         // Update stored result
         if(results[ticker]) results[ticker].price = livePrice;
         // Update price cell directly
-        const card = document.querySelector(`.card[data-ticker="${ticker}"]`);
-        if(card){
-          const priceEl = card.querySelector('.price-cell-val');
-          if(priceEl) priceEl.textContent = livePrice.toFixed(2);
-        }
+        document.querySelectorAll(`.card[data-ticker="${ticker}"] .price-cell-val`).forEach(el=>{
+          el.textContent = livePrice.toFixed(2);
+        });
+        // Also update stored result for next render
+        if(results[ticker]) results[ticker].price = livePrice;
       }catch(e){}
     }));
   }
